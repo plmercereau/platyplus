@@ -125,21 +125,28 @@
 
 <script>
   import {ALL_MODULES_QUERY, SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
-  import {formMixin, singleQuery, moduleData} from '../mixins/form'
+  import {formMixin, singleQuery, loadConfig} from '../mixins/form'
   import EditToolBar from '../components/EditToolBar'
+  const config = {
+    upsertMutation: UPSERT_MODULE_MUTATION,
+    singleQuery: SINGLE_MODULE_QUERY,
+    collectionQuery: ALL_MODULES_QUERY
+  }
 
   export default {
-    components: {EditToolBar},
     name: 'Module',
     mixins: [formMixin],
+    components: {EditToolBar},
     data () {
       return {
-        itemData: moduleData,
         tabs: ['General', 'Stages', 'Deployments']
       }
     },
     apollo: {
-      itemData: singleQuery(SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION, ALL_MODULES_QUERY)
+      itemData: singleQuery(config.singleQuery)
+    },
+    created () {
+      loadConfig(this, config)
     }
   }
 </script>

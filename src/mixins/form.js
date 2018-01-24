@@ -8,8 +8,8 @@ export const formMixin = {
   },
   data () {
     return {
-      _upsertMutation: '',
-      _collectionQuery: '',
+      config: {},
+      itemData: {},
       form: {}, // value of the form of the module element
       edit: this.create // edit mode: turns on/off the form inputs
     }
@@ -24,14 +24,14 @@ export const formMixin = {
     },
     reset () { // Resets the form to the value of the initial value of the module
       this.$refs.form.reset() // TODO check how useful it is
-      this.form = dataToForm(this.itemData, this._upsertMutation)
+      this.form = dataToForm(this.itemData, this.config.upsertMutation)
     },
     upsert () {
       this.$validator.validateAll().then((result) => {
         if (result) {
-          let collectionQuery = this._collectionQuery // this._collectionQuery is not accessible inside the update function
+          let collectionQuery = this.config.collectionQuery
           this.$apollo.mutate({
-            mutation: this._upsertMutation,
+            mutation: this.config.upsertMutation,
             variables: this.form,
             update (store, updatedData) {
               // TODO create cache query when we just created a module i.e. when the colleciton query is  not existing?
@@ -59,7 +59,7 @@ export const formMixin = {
             }
           }).then((res) => {
             this.itemData = firstAttribute(res.data, 2)
-            this.form = dataToForm(this.itemData, this._upsertMutation)
+            this.form = dataToForm(this.itemData, this.config.upsertMutation)
             this.edit = false
             if (this.$router.currentRoute.path.indexOf('create') > -1) {
               this.$router.replace({path: this.$router.currentRoute.path.replace('create', this.itemData.id)})
@@ -68,19 +68,15 @@ export const formMixin = {
             console.log('error in the upsert')
             console.error(error) // TODO handle errors
           })
-        } else {
-          // alert('form is not valid')
         }
-      }).catch((error) => {
-        console.log('error in the validation')
-        console.log(error)
       })
     }
   }
 }
 
-export function singleQuery (singleQuery, upsertMutation, collectionQuery) {
+export function singleQuery (singleQuery) {
   return {
+    // query: this.config.singleQuery, // TODO not working: pain in the...
     query: singleQuery,
     variables () {
       return {
@@ -89,9 +85,7 @@ export function singleQuery (singleQuery, upsertMutation, collectionQuery) {
     },
     update (data) {
       let item = firstAttribute(data)
-      this._upsertMutation = upsertMutation
-      this._collectionQuery = collectionQuery
-      this.form = dataToForm(item, upsertMutation)
+      this.form = dataToForm(item, this.config.upsertMutation)
       return item
     },
     skip () {
@@ -100,18 +94,11 @@ export function singleQuery (singleQuery, upsertMutation, collectionQuery) {
   }
 }
 
-export const moduleData = { // TODO create from GQL query or from FormModel
-  stages: {}
-}
-
-export const stageData = { // TODO create from GQL query or from FormModel
-  module: {
-    name: '',
-    stages: {
-      edges: []
-    }
-  },
-  nextStages: {}
+export function loadConfig (vm, config) {
+  Object.keys(config).map((key) => {
+    vm.$set(vm.config, key, config[key])
+  })
+  vm.itemData = schemaToObject(config.singleQuery)
 }
 
 export function dataToForm (data, upsertMutation) {
@@ -135,4 +122,19 @@ export function dataToForm (data, upsertMutation) {
   } catch (e) {
     return _.clone(data)
   }
+}
+
+export function schemaToObject (schema, selections) {
+  let sels = selections || schema.definitions[1].selectionSet.selections
+  return sels.reduce((field, selection) => {
+    if (selection.kind === 'Field') {
+      field[selection.name.value] = selection.selectionSet ? schemaToObject(schema, selection.selectionSet.selections) : null
+      return selection.name.value === 'edges' ? [field] : field
+    } else if (selection.kind === 'FragmentSpread') {
+      let definition = schema.definitions.find(def => {
+        return def.name.value === selection.name.value
+      })
+      return schemaToObject(schema, definition.selectionSet.selections)
+    }
+  }, {})
 }

@@ -53,7 +53,6 @@
                 v-validate="'required|min:10|max:280'"
                 :error-messages="errors.collect('shortDescription')"
               ></v-text-field>
-              <!--<v-btn :disabled="$validator.errors.any()" @click="upsert">Save</v-btn>-->
             </v-form>
             <p v-if="!edit">
               <i>{{itemData.shortDescription}}</i>
@@ -105,19 +104,26 @@
 
 <script>
   import {SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
-  import {formMixin, singleQuery, stageData} from '../mixins/form'
+  import {formMixin, loadConfig, singleQuery} from '../mixins/form'
+  const config = {
+    upsertMutation: UPSERT_STAGE_MUTATION,
+    singleQuery: SINGLE_STAGE_QUERY,
+    collectionQuery: ''
+  }
 
   export default {
     name: 'stage',
     mixins: [formMixin],
     data () {
       return {
-        itemData: stageData,
         tabs: ['General', 'Next Stages', 'Observation Forms']
       }
     },
     apollo: {
-      itemData: singleQuery(SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION)
+      itemData: singleQuery(config.singleQuery)
+    },
+    created () {
+      loadConfig(this, config)
     }
   }
 </script>
