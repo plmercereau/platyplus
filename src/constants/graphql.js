@@ -15,13 +15,6 @@ export const coreStageFragment = gql`
     __typename
     name
     shortDescription
-    nextStages {
-      edges {
-        node {
-          id
-        }
-      }
-    }
   }
 `
 
@@ -42,6 +35,32 @@ export const extendedModuleFragment = gql`
     }
   }
   ${coreModuleFragment}
+  ${coreStageFragment}
+`
+
+export const extendedStageFragment = gql`
+  fragment extendedStageFragment on StageNode {
+    ...coreStageFragment
+    module {
+      id
+      name
+      stages {
+        edges {
+          node {
+            id
+            name
+          }
+        }
+      }
+    }
+    nextStages {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
   ${coreStageFragment}
 `
 
@@ -68,6 +87,15 @@ export const SINGLE_MODULE_QUERY = gql`
   ${extendedModuleFragment}
 `
 
+export const SINGLE_STAGE_QUERY = gql`
+  query stageQuery($id: ID!){
+    stage(id:$id) {
+      ...extendedStageFragment
+    }
+  }
+  ${extendedStageFragment}
+`
+
 export const UPSERT_MODULE_MUTATION = gql`
   mutation upsertModuleMutation($id: ID, $name: String!, $shortDescription: String!) {
     upsertModule(
@@ -87,23 +115,23 @@ export const UPSERT_MODULE_MUTATION = gql`
 `
 
 export const UPSERT_STAGE_MUTATION = gql`
-  mutation upsertStageMutation($id: ID, $moduleId: ID!, $name: String!, $shortDescription: String!, $nextStages: [ID!]) {
+  mutation upsertStageMutation($id: ID, $moduleId: ID!, $name: String!, $shortDescription: String!, $nextStagesIds: [ID!]) {
     upsertStage(
       input: {
         id: $id
         moduleId: $moduleId
         name: $name
         shortDescription: $shortDescription
-        nextStages: $nextStages
+        nextStagesIds: $nextStagesIds
       }
     ) {
       stage {
-        ...coreStageFragment
+        ...extendedStageFragment
       }
       __typename
     }
   }
-  ${coreStageFragment}
+  ${extendedStageFragment}
 `
 
 export const ALL_LINKS_QUERY = gql`

@@ -31,3 +31,11 @@ export function timeDifferenceForDate (date) {
   const updated = new Date(date).getTime()
   return timeDifference(now, updated)
 }
+
+// returns the first attribute of an object. rank allows to pick the first attribute of the first sub-object recursively
+export function firstAttribute (obj, rank = 1) {
+  if (rank > 0) {
+    return firstAttribute(obj[Object.keys(obj)[0]], rank - 1)
+  }
+  return obj
+}

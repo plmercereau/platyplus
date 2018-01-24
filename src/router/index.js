@@ -75,7 +75,7 @@ export default new Router({
       }
     },
     {
-      path: '/modules/:id/stages/:idSubItem',
+      path: '/modules/:moduleId/stages/:id',
       component: Stage,
       meta: {
         title: 'Stage'

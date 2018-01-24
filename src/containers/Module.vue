@@ -120,17 +120,13 @@
         </v-tabs-content>
       </v-tabs-items>
     </v-tabs>
-
-
   </div>
 </template>
 
 <script>
-  import {ALL_MODULES_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
-  import {formMixin} from '../mixins/form'
-  import {moduleData, singleModuleQuery} from '../constants/apollo_queries'
+  import {ALL_MODULES_QUERY, SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
+  import {formMixin, singleQuery, moduleData} from '../mixins/form'
   import EditToolBar from '../components/EditToolBar'
-  // import _ from 'lodash'
 
   export default {
     components: {EditToolBar},
@@ -142,21 +138,13 @@
         tabs: ['General', 'Stages', 'Deployments']
       }
     },
-    computed: {
-      upsert_mutation () {
-        return UPSERT_MODULE_MUTATION
-      },
-      all_items_query () {
-        return ALL_MODULES_QUERY
-      }
-    },
     methods: {
       upsert () {
-        this._upsert(this._updateParentCollection)
+        this._upsert(UPSERT_MODULE_MUTATION, ALL_MODULES_QUERY)
       }
     },
     apollo: {
-      itemData: singleModuleQuery
+      itemData: singleQuery(SINGLE_MODULE_QUERY)
     }
   }
 </script>

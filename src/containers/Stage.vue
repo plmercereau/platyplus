@@ -5,8 +5,8 @@
     <v-breadcrumbs-item to="/modules">
       Modules
     </v-breadcrumbs-item>
-    <v-breadcrumbs-item :to="'/modules/' + parent.id">
-      {{parent.name}}
+    <v-breadcrumbs-item :to="'/modules/' + itemData.module.id">
+      {{itemData.module.name}}
     </v-breadcrumbs-item>
     <v-breadcrumbs-item>
       {{itemData.name || 'New'}}
@@ -16,7 +16,6 @@
   <v-btn v-if="edit" @click="upsert">Save</v-btn>
   <v-btn v-if="edit" @click="reset">reset</v-btn>
   <v-btn v-if="edit" @click="cancel">Cancel</v-btn>
-
   <v-tabs v-model="$store.state.tabs.stage">
     <v-tabs-bar>
       <v-tabs-item
@@ -66,14 +65,14 @@
         <v-card>
           <v-card-text>
             <v-list subheader>
-              <v-list-tile v-for="s in parent.stages.edges"
+              <v-list-tile v-for="s in itemData.module.stages.edges"
                            v-bind:key="s.node.id"
                            @click="">
                 <v-list-tile-content>
                   <v-list-tile-title>{{s.node.name}}</v-list-tile-title>
                 </v-list-tile-content>
                 <v-list-tile-action>
-                  <v-checkbox :disabled="!edit" v-model="nextStagesIds" :value="s.node.id"></v-checkbox>
+                  <v-checkbox :disabled="!edit" v-model="form.nextStagesIds" :value="s.node.id"></v-checkbox>
                 </v-list-tile-action>
               </v-list-tile>
               <v-divider></v-divider>
@@ -105,45 +104,27 @@
 </template>
 
 <script>
-  import {SINGLE_MODULE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
-  // import {UPSERT_STAGE_MUTATION} from '../constants/graphql'
-  import {formMixin} from '../mixins/form'
-  import {moduleData, singleModuleSingleStageQuery, stageData} from '../constants/apollo_queries'
+  import {SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
+  import {formMixin, stageFormModel, singleQuery, stageData} from '../mixins/form'
 
   export default {
     name: 'stage',
     mixins: [formMixin],
     data () {
       return {
-        parent: moduleData,
         itemData: stageData,
-        nextStagesIds: [],
-        form: {
-        },
+        // itemData: formModelToData(stageFormModel), // TODO remplacer la ligne du dessus, voir mettre dans le mixin?
+        formModel: stageFormModel,
         tabs: ['General', 'Next Stages', 'Observation Forms']
       }
     },
-    computed: {
-      upsert_mutation () {
-        return UPSERT_STAGE_MUTATION
-      },
-      single_item_query () {
-        return SINGLE_MODULE_QUERY
-      }
-    },
     methods: {
-      reset () {
-        this.$super(formMixin).reset()
-        this.nextStagesIds = this.create ? [] : this.itemData.nextStages.edges.map(el => { return el.node.id })
-      },
       upsert () {
-        this.form.nextStages = this.nextStagesIds
-        this.form.moduleId = this.parent.id
-        this._upsert(this._updateSingleItem)
+        this._upsert(UPSERT_STAGE_MUTATION)
       }
     },
     apollo: {
-      parent: singleModuleSingleStageQuery
+      itemData: singleQuery(SINGLE_STAGE_QUERY)
     }
   }
 </script>

@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import {firstAttribute} from '../utils'
 
 export const formMixin = {
   props: {
@@ -8,21 +9,8 @@ export const formMixin = {
   data () {
     return {
       form: {}, // value of the form of the module element
+      formModel: {},
       edit: this.create // edit mode: turns on/off the form inputs
-    }
-  },
-  computed: {
-    upsertName () {
-      return _.get(this.upsert_mutation, `definitions[0].selectionSet.selections[0].name.value`)
-    },
-    collectionName () {
-      return _.get(this.all_items_query, `definitions[0].selectionSet.selections[0].name.value`) || `${this.itemName}s`
-    },
-    itemName () {
-      return _.get(this.upsert_mutation, `definitions[0].selectionSet.selections[0].selectionSet.selections[0].name.value`)
-    },
-    parentName () {
-      return _.get(this.single_item_query, `definitions[0].selectionSet.selections[0].name.value`)
     }
   },
   methods: {
@@ -35,18 +23,46 @@ export const formMixin = {
     },
     reset () { // Resets the form to the value of the initial value of the module
       this.$refs.form.reset() // TODO check how useful it is
-      this.form = _.cloneDeep(this.itemData)
+      this.form = dataToForm(this.itemData, this.formModel)
     },
-    _upsert (update) {
+    _upsert (upsertMutation, collectionQuery) { // TODO debugger
       this.$validator.validateAll().then((result) => {
         if (result) {
           this.$apollo.mutate({
-            mutation: this.upsert_mutation,
+            mutation: upsertMutation,
             variables: this.form,
-            update: update
+            update (store, updatedData) {
+              // TODO create cache query when we just created a module i.e. when the colleciton query is  not existing?
+              // TODO to be clean, check if collectionQuery exists
+              try {
+                const data = store.readQuery({ // TODO sort by name
+                  query: collectionQuery
+                })
+                let item = firstAttribute(data)
+                let updatedNode = firstAttribute(updatedData.data, 2)
+                let foundIndex = item.edges.findIndex((element) => {
+                  return element.node.id === updatedNode.id
+                })
+                let newEdge = {
+                  node: updatedNode,
+                  __typename: `${updatedNode.__typename}Edge`
+                }
+                if (foundIndex > -1) {
+                  item.edges.splice(foundIndex, 1, newEdge)
+                } else {
+                  item.edges.push(newEdge)
+                }
+                store.writeQuery({
+                  query: collectionQuery,
+                  data
+                })
+              } catch (e) {
+                // console.log('Update error')
+              }
+            }
           }).then((res) => {
-            this.itemData = _.get(res, `data.${this.upsertName}.${this.itemName}`)
-            this.form = _.cloneDeep(this.itemData)
+            this.itemData = firstAttribute(res.data, 2)
+            this.form = dataToForm(this.itemData, this.formModel)
             this.edit = false
             const createStrIndex = this.$router.currentRoute.path.indexOf('create')
             if (createStrIndex > -1) {
@@ -63,64 +79,84 @@ export const formMixin = {
         console.log('error in the validation')
         console.log(error)
       })
-    },
-    _updateParentCollection (store, updatedData) { // TODO DRY
-      // TODO create cache query when we just created a module
-      try {
-        const data = store.readQuery({ // TODO sort by name
-          query: this.all_items_query
-        })
-        let foundIndex = data[this.collectionName].edges.findIndex((element) => {
-          return element.node.id === _.get(updatedData.data, `${this.upsertName}.${this.itemName}.id`)
-        })
-        let newEdge = {
-          node: updatedData.data[this.upsertName][this.itemName],
-          __typename: `${_.capitalize(this.itemName)}NodeEdge` // TODO automatize, as well as the ModuleNode in the gql query
-        }
-        if (foundIndex > -1) {
-          data[this.collectionName].edges.splice(foundIndex, 1, newEdge)
-        } else {
-          data[this.collectionName].edges.push(newEdge)
-        }
-        store.writeQuery({
-          query: this.all_items_query,
-          data
-        })
-      } catch (e) {
-        // main error caught: ALL_MODULES_QUERY has not been created yet in the store
-        // TODO create the list query if not existing?
-        console.log(e)
-      }
-    },
-    _updateSingleItem (store, initialData) { // TODO: DRY
-      try {
-        const data = store.readQuery({
-          query: this.single_item_query,
-          variables: {
-            id: this.parent.id
-          }
-        })
-        let foundIndex = this.parent[this.collectionName].edges.findIndex((element) => {
-          return element.node.id === initialData.data[this.upsertName][this.itemName].id
-        })
-        let newEdge = {
-          node: initialData.data[this.upsertName][this.itemName],
-          __typename: `${_.capitalize(this.itemName)}NodeEdge` // TODO automatize, as well as the ModuleNode in the gql query
-        }
-        if (foundIndex > -1) {
-          data[this.parentName][this.collectionName].edges.splice(foundIndex, 1, newEdge)
-        } else {
-          data[this.parentName][this.collectionName].edges.push(newEdge)
-        }
-        store.writeQuery({
-          query: this.single_item_query,
-          data
-        })
-      } catch (e) {
-        // main error caught: ALL_MODULES_QUERY has not been created yet in the store
-        // TODO create the list query if not existing?
-        console.log(e)
-      }
     }
+  }
+}
+
+export function singleQuery (query) {
+  return {
+    query: query,
+    variables () {
+      return {
+        id: this.$route.params.id
+      }
+    },
+    update (data) {
+      let item = firstAttribute(data)
+      this.form = dataToForm(item, this.formModel)
+      return item
+    },
+    skip () {
+      return (this.create)
+    }
+  }
+}
+
+export const stageFormModel = {
+  fields: ['id', 'name', 'shortDescription'],
+  foreignKeys: ['module'], // TODO developper pour pouvoir faire un algo formModelToData recursif
+  collections: ['nextStages']
+}
+
+export const moduleData = { // TODO create from GQL query or from FormModel
+  stages: {}
+}
+
+export const stageData = { // TODO create from GQL query or from FormModel
+  module: {
+    name: '',
+    stages: {
+      edges: []
+    }
+  },
+  nextStages: {}
+}
+
+export function dataToForm (data, formModel) {
+  try {
+    let result = _.pick(data, formModel.fields)
+    formModel.foreignKeys.map((fk) => {
+      result[`${fk}Id`] = data[fk].id
+    })
+    formModel.collections.map((collection) => {
+      result[`${collection}Ids`] = data[collection].edges.map(el => {
+        return el.node.id
+      })
+    })
+    return result
+  } catch (e) {
+    return _.clone(data)
+  }
+}
+
+export function formModelToData (formModel) {
+  try {
+    let result = {}
+    formModel.fields.map((field) => {
+      result[field] = ''
+    })
+    formModel.foreignKeys.map((fk) => {
+      result[fk] = {
+        id: ''
+      }
+    })
+    formModel.collections.map((collection) => {
+      result[collection] = {
+        edges: []
+      }
+    })
+    return result
+  } catch (e) {
+    return {}
   }
 }
