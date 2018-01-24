@@ -105,7 +105,7 @@
 
 <script>
   import {SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
-  import {formMixin, stageFormModel, singleQuery, stageData} from '../mixins/form'
+  import {formMixin, singleQuery, stageData} from '../mixins/form'
 
   export default {
     name: 'stage',
@@ -113,18 +113,11 @@
     data () {
       return {
         itemData: stageData,
-        // itemData: formModelToData(stageFormModel), // TODO remplacer la ligne du dessus, voir mettre dans le mixin?
-        formModel: stageFormModel,
         tabs: ['General', 'Next Stages', 'Observation Forms']
       }
     },
-    methods: {
-      upsert () {
-        this._upsert(UPSERT_STAGE_MUTATION)
-      }
-    },
     apollo: {
-      itemData: singleQuery(SINGLE_STAGE_QUERY)
+      itemData: singleQuery(SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION)
     }
   }
 </script>

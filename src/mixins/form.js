@@ -8,8 +8,9 @@ export const formMixin = {
   },
   data () {
     return {
+      _upsertMutation: '',
+      _collectionQuery: '',
       form: {}, // value of the form of the module element
-      formModel: {},
       edit: this.create // edit mode: turns on/off the form inputs
     }
   },
@@ -23,23 +24,22 @@ export const formMixin = {
     },
     reset () { // Resets the form to the value of the initial value of the module
       this.$refs.form.reset() // TODO check how useful it is
-      this.form = dataToForm(this.itemData, this.formModel)
+      this.form = dataToForm(this.itemData, this._upsertMutation)
     },
-    _upsert (upsertMutation, collectionQuery) { // TODO debugger
+    upsert () {
       this.$validator.validateAll().then((result) => {
         if (result) {
+          let collectionQuery = this._collectionQuery // this._collectionQuery is not accessible inside the update function
           this.$apollo.mutate({
-            mutation: upsertMutation,
+            mutation: this._upsertMutation,
             variables: this.form,
             update (store, updatedData) {
               // TODO create cache query when we just created a module i.e. when the colleciton query is  not existing?
-              // TODO to be clean, check if collectionQuery exists
+              // TODO to be clean, check if _collectionQuery exists
               try {
-                const data = store.readQuery({ // TODO sort by name
-                  query: collectionQuery
-                })
-                let item = firstAttribute(data)
+                const data = store.readQuery({ query: collectionQuery }) // TODO sort by name
                 let updatedNode = firstAttribute(updatedData.data, 2)
+                let item = firstAttribute(data)
                 let foundIndex = item.edges.findIndex((element) => {
                   return element.node.id === updatedNode.id
                 })
@@ -52,20 +52,16 @@ export const formMixin = {
                 } else {
                   item.edges.push(newEdge)
                 }
-                store.writeQuery({
-                  query: collectionQuery,
-                  data
-                })
+                store.writeQuery({ query: collectionQuery, data })
               } catch (e) {
                 // console.log('Update error')
               }
             }
           }).then((res) => {
             this.itemData = firstAttribute(res.data, 2)
-            this.form = dataToForm(this.itemData, this.formModel)
+            this.form = dataToForm(this.itemData, this._upsertMutation)
             this.edit = false
-            const createStrIndex = this.$router.currentRoute.path.indexOf('create')
-            if (createStrIndex > -1) {
+            if (this.$router.currentRoute.path.indexOf('create') > -1) {
               this.$router.replace({path: this.$router.currentRoute.path.replace('create', this.itemData.id)})
             }
           }).catch((error) => {
@@ -83,9 +79,9 @@ export const formMixin = {
   }
 }
 
-export function singleQuery (query) {
+export function singleQuery (singleQuery, upsertMutation, collectionQuery) {
   return {
-    query: query,
+    query: singleQuery,
     variables () {
       return {
         id: this.$route.params.id
@@ -93,19 +89,15 @@ export function singleQuery (query) {
     },
     update (data) {
       let item = firstAttribute(data)
-      this.form = dataToForm(item, this.formModel)
+      this._upsertMutation = upsertMutation
+      this._collectionQuery = collectionQuery
+      this.form = dataToForm(item, upsertMutation)
       return item
     },
     skip () {
       return (this.create)
     }
   }
-}
-
-export const stageFormModel = {
-  fields: ['id', 'name', 'shortDescription'],
-  foreignKeys: ['module'], // TODO developper pour pouvoir faire un algo formModelToData recursif
-  collections: ['nextStages']
 }
 
 export const moduleData = { // TODO create from GQL query or from FormModel
@@ -122,41 +114,25 @@ export const stageData = { // TODO create from GQL query or from FormModel
   nextStages: {}
 }
 
-export function dataToForm (data, formModel) {
+export function dataToForm (data, upsertMutation) {
   try {
-    let result = _.pick(data, formModel.fields)
-    formModel.foreignKeys.map((fk) => {
-      result[`${fk}Id`] = data[fk].id
-    })
-    formModel.collections.map((collection) => {
-      result[`${collection}Ids`] = data[collection].edges.map(el => {
-        return el.node.id
+    return upsertMutation.definitions[0].variableDefinitions
+      .map((definition) => {
+        return definition.variable.name.value
       })
-    })
-    return result
+      .reduce((node, field) => {
+        if (field.endsWith('Ids')) {
+          node[field] = data[field.slice(0, -3)].edges.map(el => {
+            return el.node.id
+          })
+        } else if (field.endsWith('Id')) {
+          node[field] = data[field.slice(0, -2)].id
+        } else {
+          node[field] = data[field]
+        }
+        return node
+      }, {})
   } catch (e) {
     return _.clone(data)
-  }
-}
-
-export function formModelToData (formModel) {
-  try {
-    let result = {}
-    formModel.fields.map((field) => {
-      result[field] = ''
-    })
-    formModel.foreignKeys.map((fk) => {
-      result[fk] = {
-        id: ''
-      }
-    })
-    formModel.collections.map((collection) => {
-      result[collection] = {
-        edges: []
-      }
-    })
-    return result
-  } catch (e) {
-    return {}
   }
 }

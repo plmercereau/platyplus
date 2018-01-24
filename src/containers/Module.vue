@@ -138,13 +138,8 @@
         tabs: ['General', 'Stages', 'Deployments']
       }
     },
-    methods: {
-      upsert () {
-        this._upsert(UPSERT_MODULE_MUTATION, ALL_MODULES_QUERY)
-      }
-    },
     apollo: {
-      itemData: singleQuery(SINGLE_MODULE_QUERY)
+      itemData: singleQuery(SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION, ALL_MODULES_QUERY)
     }
   }
 </script>
