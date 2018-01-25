@@ -43,15 +43,6 @@ export const extendedStageFragment = gql`
     ...coreStageFragment
     module {
       id
-      name
-      stages {
-        edges {
-          node {
-            id
-            name
-          }
-        }
-      }
     }
     nextStages {
       edges {

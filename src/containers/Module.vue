@@ -5,8 +5,8 @@
       <v-breadcrumbs-item to="/modules">
         Modules
       </v-breadcrumbs-item>
-      <v-breadcrumbs-item>
-        {{itemData.name || 'New'}}
+      <v-breadcrumbs-item :to="'/modules' + module.id">
+        {{module.name || 'New'}}
       </v-breadcrumbs-item>
     </v-breadcrumbs>
     <v-btn v-if="!edit" @click="edit=!edit">Edit</v-btn>
@@ -31,12 +31,12 @@
           <v-card>
             <v-card-text>
               <p v-if="!edit">
-                <i>{{itemData.shortDescription}}</i>
+                <i>{{module.shortDescription}}</i>
               </p>
-              <v-form v-if="edit" ref="form">
+              <v-form v-if="edit" ref="moduleForm">
                 <v-text-field
                   label="Name"
-                  v-model="form.name"
+                  v-model="formData.module.name"
                   :counter="20"
                   data-vv-name="name"
                   required
@@ -45,7 +45,7 @@
                 ></v-text-field>
                 <v-text-field
                   label="Short description"
-                  v-model="form.shortDescription"
+                  v-model="formData.module.shortDescription"
                   :counter="280"
                   multi-line rows="2" auto-grow
                   data-vv-name="shortDescription"
@@ -63,10 +63,10 @@
           <v-card>
             <v-card-text>
               <v-list subheader>
-                <v-list-tile v-for="stage in itemData.stages.edges"
+                <v-list-tile v-for="stage in module.stages.edges"
                              v-bind:key="stage.node.id"
                              @click=""
-                             :to="'/modules/' + itemData.id + '/stages/' + stage.node.id">
+                             :to="'/modules/' + module.id + '/stages/' + stage.node.id">
                   <v-list-tile-content>
                     <v-list-tile-title>{{stage.node.name}}</v-list-tile-title>
                   </v-list-tile-content>
@@ -76,7 +76,7 @@
                 </v-list-tile>
                 <v-divider></v-divider>
                 <v-list-tile
-                             :to="'/modules/' + itemData.id + '/stages/create'">
+                             :to="'/modules/' + module.id + '/stages/create'">
                   <v-list-tile-content>
                     <v-list-tile-title><i>Add new stage</i></v-list-tile-title>
                   </v-list-tile-content>
@@ -125,25 +125,25 @@
 
 <script>
   import {ALL_MODULES_QUERY, SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
-  import {formMixin, singleQuery} from '../mixins/form'
-  import EditToolBar from '../components/EditToolBar'
+  import {dataItemMixin, itemManager} from '../mixins/dataItem'
   const config = {
     upsertMutation: UPSERT_MODULE_MUTATION,
     singleQuery: SINGLE_MODULE_QUERY,
-    collectionQuery: ALL_MODULES_QUERY
+    collectionQuery: ALL_MODULES_QUERY,
+    editable: true,
+    paramKey: 'id'
   }
 
   export default {
     name: 'Module',
-    mixins: [formMixin],
-    components: {EditToolBar},
+    mixins: [dataItemMixin],
     data () {
       return {
         tabs: ['General', 'Stages', 'Deployments']
       }
     },
     apollo: {
-      itemData: singleQuery(config)
+      ...itemManager('module', config)
     }
   }
 </script>

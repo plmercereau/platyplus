@@ -5,15 +5,15 @@
     <v-breadcrumbs-item to="/modules">
       Modules
     </v-breadcrumbs-item>
-    <v-breadcrumbs-item :to="'/modules/' + itemData.module.id">
-      {{itemData.module.name}}
+    <v-breadcrumbs-item :to="'/modules/' + module.id">
+      {{module.name}}
     </v-breadcrumbs-item>
     <v-breadcrumbs-item>
-      {{itemData.name || 'New'}}
+      {{stage.name || 'New'}}
     </v-breadcrumbs-item>
   </v-breadcrumbs>
   <v-btn v-if="!edit" @click="edit=!edit">Edit</v-btn>
-  <v-btn v-if="edit" @click="upsert">Save</v-btn>
+  <v-btn v-if="edit" @click="upsert()">Save</v-btn>
   <v-btn v-if="edit" @click="reset">reset</v-btn>
   <v-btn v-if="edit" @click="cancel">Cancel</v-btn>
   <v-tabs v-model="$store.state.tabs.stage">
@@ -32,10 +32,10 @@
       <v-tabs-content key="General" id="General" @click.stop="$store.commit('setTab',{component:'stage',tab:'General'})">
         <v-card>
           <v-card-text>
-            <v-form v-if="edit" ref="form">
+            <v-form v-if="edit" ref="stageForm">
               <v-text-field
                 label="Name"
-                v-model="form.name"
+                v-model="formData.stage.name"
                 :counter="20"
                 data-vv-name="name"
                 required
@@ -44,7 +44,7 @@
               ></v-text-field>
               <v-text-field
                 label="Short description"
-                v-model="form.shortDescription"
+                v-model="formData.stage.shortDescription"
                 :counter="280"
                 multi-line rows="2" auto-grow
                 data-vv-name="shortDescription"
@@ -55,7 +55,7 @@
               ></v-text-field>
             </v-form>
             <p v-if="!edit">
-              <i>{{itemData.shortDescription}}</i>
+              <i>{{stage.shortDescription}}</i>
             </p>
           </v-card-text>
         </v-card>
@@ -64,14 +64,14 @@
         <v-card>
           <v-card-text>
             <v-list subheader>
-              <v-list-tile v-for="s in itemData.module.stages.edges"
+              <v-list-tile v-for="s in module.stages.edges"
                            v-bind:key="s.node.id"
                            @click="">
                 <v-list-tile-content>
                   <v-list-tile-title>{{s.node.name}}</v-list-tile-title>
                 </v-list-tile-content>
                 <v-list-tile-action>
-                  <v-checkbox :disabled="!edit" v-model="form.nextStagesIds" :value="s.node.id"></v-checkbox>
+                  <v-checkbox :disabled="!edit" v-model="formData.stage.nextStagesIds" :value="s.node.id"></v-checkbox>
                 </v-list-tile-action>
               </v-list-tile>
               <v-divider></v-divider>
@@ -103,24 +103,31 @@
 </template>
 
 <script>
-  import {SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
-  import {formMixin, singleQuery} from '../mixins/form'
-  const config = {
-    upsertMutation: UPSERT_STAGE_MUTATION,
+  import {SINGLE_MODULE_QUERY, SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
+  import {dataItemMixin, itemManager} from '../mixins/dataItem'
+  const stageConfig = {
     singleQuery: SINGLE_STAGE_QUERY,
-    collectionQuery: ''
+    upsertMutation: UPSERT_STAGE_MUTATION,
+    editable: true,
+    paramKey: 'id', // default value = itemNameId
+    formDataName: 'stage', // default value
+    formRefName: 'stageForm' // default value
+  }
+  const moduleConfig = {
+    singleQuery: SINGLE_MODULE_QUERY
   }
 
   export default {
     name: 'stage',
-    mixins: [formMixin],
+    mixins: [dataItemMixin],
     data () {
       return {
-        tabs: ['General', 'Next Stages', 'Observation Forms']
+        tabs: ['General', 'Next Stages', 'Observation Forms'] // TODO set the tab as a param sent through the router?
       }
     },
     apollo: {
-      itemData: singleQuery(config)
+      ...itemManager('stage', stageConfig),
+      ...itemManager('module', moduleConfig)
     }
   }
 </script>

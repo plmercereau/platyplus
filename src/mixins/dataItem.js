@@ -1,20 +1,26 @@
 import _ from 'lodash'
 import {firstAttribute} from '../utils'
 
-export const formMixin = {
+export const dataItemMixin = {
   props: {
     create: Boolean // available from the url through vue-router config
-    // TODO set the tab as a param sent through the router?
   },
   data () {
     return {
-      config: {},
-      itemData: {},
-      form: {}, // value of the form of the module element
+      config: [],
+      formData: [],
+      itemData: [], // TODO move all item Datas into this array instead of putting them in the component root?
+      // TODO edit at form level -> how to pass create param for only one form?
       edit: this.create // edit mode: turns on/off the form inputs
     }
   },
   methods: {
+    _getItemName (data) { // TODO remove from mixin
+      let firstEditable = Object.keys(this.config).find((el) => {
+        return this.config[el].editable
+      })
+      return _.isString(data) ? data : firstEditable
+    },
     cancel () { // Leaves the edit mode of the module
       if (this.create) { // If new module being created, goes to the previous router view
         this.$router.go(-1)
@@ -22,20 +28,23 @@ export const formMixin = {
         this.edit = !this.edit
       }
     },
-    reset () { // Resets the form to the value of the initial value of the module
-      this.$refs.form.reset() // TODO check how useful it is
-      this.form = dataToForm(this.config.upsertMutation, this.itemData)
+    reset (itemName) { // Resets the form to the value of the initial value of the module
+      let itName = this._getItemName(itemName)
+      this.$refs[this.config[itName].formRefName].reset() // TODO check how useful it is
+      this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
     },
-    upsert () {
+    upsert (itemName) {
+      let itName = this._getItemName(itemName)
       this.$validator.validateAll().then((result) => {
         if (result) {
-          let collectionQuery = this.config.collectionQuery
+          let collectionQuery = this.config[itName].collectionQuery
           this.$apollo.mutate({
-            mutation: this.config.upsertMutation,
-            variables: this.form,
+            mutation: this.config[itName].upsertMutation,
+            variables: this.formData[this.config[itName].formDataName],
             update (store, updatedData) {
               // TODO create cache query when we just created a module i.e. when the colleciton query is  not existing?
               // TODO to be clean, check if _collectionQuery exists
+              // TODO reload module when saving a stage, or update module.stages in the cache?
               try {
                 const data = store.readQuery({ query: collectionQuery }) // TODO sort by name
                 let updatedNode = firstAttribute(updatedData.data, 2)
@@ -54,15 +63,15 @@ export const formMixin = {
                 }
                 store.writeQuery({ query: collectionQuery, data })
               } catch (e) {
-                console.log('Update error')
+                // console.log('Update error')
               }
             }
           }).then((res) => {
-            this.itemData = firstAttribute(res.data, 2)
-            this.form = dataToForm(this.config.upsertMutation, this.itemData)
+            this[itName] = firstAttribute(res.data, 2)
+            this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
             this.edit = false
             if (this.$router.currentRoute.path.indexOf('create') > -1) {
-              this.$router.replace({path: this.$router.currentRoute.path.replace('create', this.itemData.id)})
+              this.$router.replace({path: this.$router.currentRoute.path.replace('create', this[itName].id)})
             }
           }).catch((error) => {
             console.log('error in the upsert')
@@ -74,37 +83,53 @@ export const formMixin = {
   }
 }
 
-export function singleQuery (config) {
-  return {
-    // query: this.config.singleQuery, // TODO not working: pain in the...
-    query: config.singleQuery,
-    variables () {
-      return {
-        id: this.$route.params.id
-      }
-    },
-    update (data) {
-      let item = firstAttribute(data)
-      this.form = dataToForm(this.config.upsertMutation, item)
-      return item
-    },
-    skip () {
-      this.itemData = schemaToObject(config.singleQuery)
-      this.config = config
-      if (this.create) {
-        Object.keys(this.$route.params).map((param) => {
-          if (param.endsWith('Id') && param !== 'Id') {
-            this.itemData[param.slice(0, -2)].id = this.$route.params[param]
+export function itemManager (itemName, config) {
+  let res = {}
+  res[itemName] = function () {
+    let fullConfig = _.clone(config)
+    fullConfig.formDataName = config.formDataName || itemName
+    fullConfig.formRefName = config.formRefName || `${itemName}Form`
+    fullConfig.paramKey = config.paramKey || `${itemName}Id`
+    fullConfig.editable = fullConfig.editable || false
+    return {
+      query: config.singleQuery,
+      variables () {
+        return {
+          id: this.$route.params[fullConfig.paramKey]
+        }
+      },
+      update (data) {
+        let item = firstAttribute(data)
+        if (fullConfig.editable && fullConfig.upsertMutation) {
+          this.formData[fullConfig.formDataName] = dataToForm(fullConfig.upsertMutation, item)
+        }
+        return item
+      },
+      skip () {
+        this[itemName] = schemaToObject(fullConfig.singleQuery)
+        if (!this.config[itemName]) {
+          this.$set(this.config, itemName, fullConfig)
+          if (fullConfig.editable) {
+            if (this.create && fullConfig.editable) {
+              Object.keys(this.$route.params).map((param) => {
+                if (param.endsWith('Id') && param !== 'Id') {
+                  this[itemName][param.slice(0, -2)].id = this.$route.params[param]
+                }
+              })
+              this.$set(this.formData, fullConfig.formDataName, dataToForm(config.upsertMutation, this[itemName]))
+            } else {
+              this.$set(this.formData, fullConfig.formDataName, {})
+            }
           }
-        })
-        this.form = dataToForm(config.upsertMutation, this.itemData)
+        }
+        return this.create && fullConfig.editable // TODO create as a param as well?
       }
-      return (this.create)
     }
   }
+  return res
 }
 
-export function dataToForm (upsertMutation, data) {
+function dataToForm (upsertMutation, data) {
   try {
     return upsertMutation.definitions[0].variableDefinitions
       .map((definition) => {
@@ -128,12 +153,15 @@ export function dataToForm (upsertMutation, data) {
         return node
       }, {})
   } catch (e) {
-    console.log('error in dataToForm')
+    console.log('Error in dataToForm')
+    if (!upsertMutation) {
+      console.log('No upsert mutation has been defined in the configuration')
+    }
     return _.clone(data)
   }
 }
 
-export function schemaToObject (schema, selections) {
+function schemaToObject (schema, selections) {
   let sels = selections || schema.definitions[1].selectionSet.selections
   return sels.reduce((field, selection) => {
     if (selection.kind === 'Field') {
