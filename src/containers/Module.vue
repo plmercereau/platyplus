@@ -125,7 +125,7 @@
 
 <script>
   import {ALL_MODULES_QUERY, SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
-  import {formMixin, singleQuery, loadConfig} from '../mixins/form'
+  import {formMixin, initForm, singleQuery} from '../mixins/form'
   import EditToolBar from '../components/EditToolBar'
   const config = {
     upsertMutation: UPSERT_MODULE_MUTATION,
@@ -143,10 +143,10 @@
       }
     },
     apollo: {
-      itemData: singleQuery(config.singleQuery)
+      itemData () { return singleQuery(config) }
     },
     created () {
-      loadConfig(this, config)
+      initForm(this, config)
     }
   }
 </script>

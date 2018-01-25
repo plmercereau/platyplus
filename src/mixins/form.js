@@ -74,10 +74,10 @@ export const formMixin = {
   }
 }
 
-export function singleQuery (singleQuery) {
+export function singleQuery (config) {
   return {
     // query: this.config.singleQuery, // TODO not working: pain in the...
-    query: singleQuery,
+    query: config.singleQuery,
     variables () {
       return {
         id: this.$route.params.id
@@ -85,6 +85,9 @@ export function singleQuery (singleQuery) {
     },
     update (data) {
       let item = firstAttribute(data)
+      Object.keys(config).map((key) => {
+        this.$set(this.config, key, config[key])
+      })
       this.form = dataToForm(item, this.config.upsertMutation)
       return item
     },
@@ -94,11 +97,10 @@ export function singleQuery (singleQuery) {
   }
 }
 
-export function loadConfig (vm, config) {
-  Object.keys(config).map((key) => {
-    vm.$set(vm.config, key, config[key])
-  })
-  vm.itemData = schemaToObject(config.singleQuery)
+export function initForm (vm, config) {
+  if (_.isEmpty(vm.itemData)) {
+    vm.itemData = schemaToObject(config.singleQuery)
+  }
 }
 
 export function dataToForm (data, upsertMutation) {
