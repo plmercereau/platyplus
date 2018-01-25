@@ -67,7 +67,7 @@ export default new Router({
       }
     },
     {
-      path: '/modules/:id/stages/create',
+      path: '/modules/:moduleId/stages/create',
       props: { create: true },
       component: Stage,
       meta: {

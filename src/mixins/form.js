@@ -24,7 +24,7 @@ export const formMixin = {
     },
     reset () { // Resets the form to the value of the initial value of the module
       this.$refs.form.reset() // TODO check how useful it is
-      this.form = dataToForm(this.itemData, this.config.upsertMutation)
+      this.form = dataToForm(this.config.upsertMutation, this.itemData)
     },
     upsert () {
       this.$validator.validateAll().then((result) => {
@@ -54,12 +54,12 @@ export const formMixin = {
                 }
                 store.writeQuery({ query: collectionQuery, data })
               } catch (e) {
-                // console.log('Update error')
+                console.log('Update error')
               }
             }
           }).then((res) => {
             this.itemData = firstAttribute(res.data, 2)
-            this.form = dataToForm(this.itemData, this.config.upsertMutation)
+            this.form = dataToForm(this.config.upsertMutation, this.itemData)
             this.edit = false
             if (this.$router.currentRoute.path.indexOf('create') > -1) {
               this.$router.replace({path: this.$router.currentRoute.path.replace('create', this.itemData.id)})
@@ -85,43 +85,50 @@ export function singleQuery (config) {
     },
     update (data) {
       let item = firstAttribute(data)
-      Object.keys(config).map((key) => {
-        this.$set(this.config, key, config[key])
-      })
-      this.form = dataToForm(item, this.config.upsertMutation)
+      this.form = dataToForm(this.config.upsertMutation, item)
       return item
     },
     skip () {
+      this.itemData = schemaToObject(config.singleQuery)
+      this.config = config
+      if (this.create) {
+        Object.keys(this.$route.params).map((param) => {
+          if (param.endsWith('Id') && param !== 'Id') {
+            this.itemData[param.slice(0, -2)].id = this.$route.params[param]
+          }
+        })
+        this.form = dataToForm(config.upsertMutation, this.itemData)
+      }
       return (this.create)
     }
   }
 }
 
-export function initForm (vm, config) {
-  if (_.isEmpty(vm.itemData)) {
-    vm.itemData = schemaToObject(config.singleQuery)
-  }
-}
-
-export function dataToForm (data, upsertMutation) {
+export function dataToForm (upsertMutation, data) {
   try {
     return upsertMutation.definitions[0].variableDefinitions
       .map((definition) => {
         return definition.variable.name.value
       })
       .reduce((node, field) => {
+        let fieldData = null
         if (field.endsWith('Ids')) {
-          node[field] = data[field.slice(0, -3)].edges.map(el => {
-            return el.node.id
-          })
+          fieldData = data[field.slice(0, -3)].edges.reduce((filtered, cursor) => {
+            if (cursor.node.id) {
+              filtered.push(cursor.node.id)
+            }
+            return filtered
+          }, [])
         } else if (field.endsWith('Id')) {
-          node[field] = data[field.slice(0, -2)].id
+          fieldData = data[field.slice(0, -2)].id
         } else {
-          node[field] = data[field]
+          fieldData = data[field]
         }
+        if (fieldData) { node[field] = fieldData }
         return node
       }, {})
   } catch (e) {
+    console.log('error in dataToForm')
     return _.clone(data)
   }
 }
@@ -131,7 +138,7 @@ export function schemaToObject (schema, selections) {
   return sels.reduce((field, selection) => {
     if (selection.kind === 'Field') {
       field[selection.name.value] = selection.selectionSet ? schemaToObject(schema, selection.selectionSet.selections) : null
-      return selection.name.value === 'edges' ? [field] : field
+      return selection.name.value === 'node' ? [field] : field
     } else if (selection.kind === 'FragmentSpread') {
       let definition = schema.definitions.find(def => {
         return def.name.value === selection.name.value

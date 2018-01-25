@@ -104,7 +104,7 @@
 
 <script>
   import {SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
-  import {formMixin, initForm, singleQuery} from '../mixins/form'
+  import {formMixin, singleQuery} from '../mixins/form'
   const config = {
     upsertMutation: UPSERT_STAGE_MUTATION,
     singleQuery: SINGLE_STAGE_QUERY,
@@ -120,10 +120,7 @@
       }
     },
     apollo: {
-      itemData () { return singleQuery(config) }
-    },
-    created () {
-      initForm(this, config)
+      itemData: singleQuery(config)
     }
   }
 </script>
