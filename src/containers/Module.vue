@@ -1,12 +1,6 @@
 <template>
   <div>
-    <v-container v-if="loading" grid-list-md text-xs-center>
-      <v-layout row wrap>
-        <v-flex xs12>
-          <v-progress-circular indeterminate color="primary" v-bind:size="32"></v-progress-circular>
-        </v-flex>
-      </v-layout>
-    </v-container>
+    <loading-page v-if="loading" />
     <v-container grid-list-md v-if="!loading" transition="fade">
       <v-breadcrumbs large>
         <v-icon slot="divider">chevron_right</v-icon>
@@ -136,6 +130,7 @@
 <script>
   import {ALL_MODULES_QUERY, SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
   import {dataItemMixin, itemManager} from '../mixins/dataItem'
+  import LoadingPage from '../components/LoadingPage'
 
   const moduleConfig = {
     upsertMutation: UPSERT_MODULE_MUTATION,
@@ -144,6 +139,7 @@
   }
 
   export default {
+    components: {LoadingPage},
     name: 'module',
     mixins: [dataItemMixin],
     data () {
