@@ -1,0 +1,8 @@
+<script type="text/x-template" id="data-item-template">
+  <div>
+    <v-progress-circular v-if="loading" indeterminate color="primary" v-bind:size="32"></v-progress-circular>
+    <transition name="fade" v-if="!loading">
+      <slot></slot>
+    </transition>
+  </div>
+</script>

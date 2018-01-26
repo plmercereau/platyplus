@@ -7,6 +7,7 @@ export const dataItemMixin = {
   },
   data () {
     return {
+      loading: 0,
       config: [],
       formData: [],
       itemData: [], // TODO move all item Datas into this array instead of putting them in the component root?
@@ -43,7 +44,7 @@ export const dataItemMixin = {
                 const data = store.readQuery({ query: collectionQuery }) // TODO sort by name
                 let updatedNode = firstAttribute(updatedData.data, 2)
                 let item = firstAttribute(data)
-                let foundIndex = item.edges.findIndex((element) => {
+                let foundIndex = item['edges'].findIndex((element) => {
                   return element.node.id === updatedNode.id
                 })
                 let newEdge = {
@@ -51,9 +52,9 @@ export const dataItemMixin = {
                   __typename: `${updatedNode.__typename}Edge`
                 }
                 if (foundIndex > -1) {
-                  item.edges.splice(foundIndex, 1, newEdge)
+                  item['edges'].splice(foundIndex, 1, newEdge)
                 } else {
-                  item.edges.push(newEdge)
+                  item['edges'].push(newEdge)
                 }
                 store.writeQuery({ query: collectionQuery, data })
               } catch (e) {
@@ -139,7 +140,7 @@ function dataToForm (upsertMutation, data) {
       .reduce((node, field) => {
         let fieldData = null
         if (field.endsWith('Ids')) {
-          fieldData = data[field.slice(0, -3)].edges.reduce((filtered, cursor) => {
+          fieldData = data[field.slice(0, -3)]['edges'].reduce((filtered, cursor) => {
             if (cursor.node.id) {
               filtered.push(cursor.node.id)
             }
