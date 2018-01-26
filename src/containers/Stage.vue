@@ -108,7 +108,6 @@
   const stageConfig = {
     singleQuery: SINGLE_STAGE_QUERY,
     upsertMutation: UPSERT_STAGE_MUTATION,
-    editable: true,
     paramKey: 'id', // default value = itemNameId
     formDataName: 'stage', // default value
     formRefName: 'stageForm' // default value

@@ -130,7 +130,6 @@
     upsertMutation: UPSERT_MODULE_MUTATION,
     singleQuery: SINGLE_MODULE_QUERY,
     collectionQuery: ALL_MODULES_QUERY,
-    editable: true,
     paramKey: 'id'
   }
 

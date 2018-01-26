@@ -10,31 +10,25 @@ export const dataItemMixin = {
       config: [],
       formData: [],
       itemData: [], // TODO move all item Datas into this array instead of putting them in the component root?
-      // TODO edit at form level -> how to pass create param for only one form?
-      edit: this.create // edit mode: turns on/off the form inputs
+      edit: this.create // edit mode: turns on/off the forms inputs // TODO move to form level?
     }
   },
   methods: {
-    _getItemName (data) { // TODO remove from mixin
-      let firstEditable = Object.keys(this.config).find((el) => {
-        return this.config[el].editable
-      })
-      return _.isString(data) ? data : firstEditable
-    },
-    cancel () { // Leaves the edit mode of the module
-      if (this.create) { // If new module being created, goes to the previous router view
+    cancel (itemName) { // Leaves the edit mode of the item
+      let itName = getItemName(this, itemName)
+      if (this.config[itName].create) { // If new item being created, goes to the previous router view
         this.$router.go(-1)
-      } else { // If editing an existing module, leaves the edit mode of the component
+      } else { // If editing a current page, leaves the edit mode of the component
         this.edit = !this.edit
       }
     },
-    reset (itemName) { // Resets the form to the value of the initial value of the module
-      let itName = this._getItemName(itemName)
-      this.$refs[this.config[itName].formRefName].reset() // TODO check how useful it is
+    reset (itemName) { // Resets the form to the value of the initial value of the item
+      let itName = getItemName(this, itemName)
+      this.$refs[this.config[itName].formRefName].reset()
       this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
     },
     upsert (itemName) {
-      let itName = this._getItemName(itemName)
+      let itName = getItemName(this, itemName)
       this.$validator.validateAll().then((result) => {
         if (result) {
           let collectionQuery = this.config[itName].collectionQuery
@@ -42,9 +36,9 @@ export const dataItemMixin = {
             mutation: this.config[itName].upsertMutation,
             variables: this.formData[this.config[itName].formDataName],
             update (store, updatedData) {
-              // TODO create cache query when we just created a module i.e. when the colleciton query is  not existing?
-              // TODO to be clean, check if _collectionQuery exists
-              // TODO reload module when saving a stage, or update module.stages in the cache?
+              // TODO create cache query when we just created an item i.e. when the colleciton query is  not existing?
+              // TODO check if config.collectionQuery exists
+              // TODO reload mode when saving a stage, or update module.stages in the cache?
               try {
                 const data = store.readQuery({ query: collectionQuery }) // TODO sort by name
                 let updatedNode = firstAttribute(updatedData.data, 2)
@@ -70,7 +64,7 @@ export const dataItemMixin = {
             this[itName] = firstAttribute(res.data, 2)
             this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
             this.edit = false
-            if (this.$router.currentRoute.path.indexOf('create') > -1) {
+            if (this.$router.currentRoute.path.indexOf('create') > -1) { // TODO tricky as we can't guess for which item create param is for
               this.$router.replace({path: this.$router.currentRoute.path.replace('create', this[itName].id)})
             }
           }).catch((error) => {
@@ -90,7 +84,6 @@ export function itemManager (itemName, config) {
     fullConfig.formDataName = config.formDataName || itemName
     fullConfig.formRefName = config.formRefName || `${itemName}Form`
     fullConfig.paramKey = config.paramKey || `${itemName}Id`
-    fullConfig.editable = fullConfig.editable || false
     return {
       query: config.singleQuery,
       variables () {
@@ -100,33 +93,39 @@ export function itemManager (itemName, config) {
       },
       update (data) {
         let item = firstAttribute(data)
-        if (fullConfig.editable && fullConfig.upsertMutation) {
+        if (fullConfig.upsertMutation) {
           this.formData[fullConfig.formDataName] = dataToForm(fullConfig.upsertMutation, item)
         }
         return item
       },
       skip () {
-        this[itemName] = schemaToObject(fullConfig.singleQuery)
-        if (!this.config[itemName]) {
-          this.$set(this.config, itemName, fullConfig)
-          if (fullConfig.editable) {
-            if (this.create && fullConfig.editable) {
+        if (!_.has(this.config, itemName)) {
+          this[itemName] = schemaToObject(fullConfig.singleQuery)
+          fullConfig.create = !_.has(this.$route.params, fullConfig.paramKey)
+          if (fullConfig.upsertMutation) {
+            if (fullConfig.create) {
               Object.keys(this.$route.params).map((param) => {
-                if (param.endsWith('Id') && param !== 'Id') {
+                if (param.endsWith('Id') && param !== fullConfig.paramKey) {
                   this[itemName][param.slice(0, -2)].id = this.$route.params[param]
                 }
               })
-              this.$set(this.formData, fullConfig.formDataName, dataToForm(config.upsertMutation, this[itemName]))
-            } else {
-              this.$set(this.formData, fullConfig.formDataName, {})
             }
+            this.$set(this.formData, fullConfig.formDataName, dataToForm(fullConfig.upsertMutation, this[itemName]))
           }
+          this.$set(this.config, itemName, fullConfig)
         }
-        return this.create && fullConfig.editable // TODO create as a param as well?
+        return fullConfig.create // TODO create as a param as well?
       }
     }
   }
   return res
+}
+
+function getItemName (vm, data) {
+  let firstEditable = Object.keys(vm.config).find((el) => {
+    return vm.config[el].upsertMutation
+  })
+  return _.isString(data) ? data : firstEditable
 }
 
 function dataToForm (upsertMutation, data) {
