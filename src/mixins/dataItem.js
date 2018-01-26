@@ -77,15 +77,17 @@ export const dataItemMixin = {
   }
 }
 
-export function itemManager (itemName, config) {
+export function itemManager (config) {
   let res = {}
+  let itemName = config.itemName || config.singleQuery.definitions[0].selectionSet.selections[0].name.value
   res[itemName] = function () {
     let fullConfig = _.clone(config)
-    fullConfig.formDataName = config.formDataName || itemName
-    fullConfig.formRefName = config.formRefName || `${itemName}Form`
-    fullConfig.paramKey = config.paramKey || `${itemName}Id`
+    fullConfig.itemName = config.itemName || config.singleQuery.definitions[0].selectionSet.selections[0].name.value
+    fullConfig.formDataName = config.formDataName || fullConfig.itemName
+    fullConfig.formRefName = config.formRefName || `${fullConfig.itemName}Form`
+    fullConfig.paramKey = `${fullConfig.itemName}Id`
     return {
-      query: config.singleQuery,
+      query: fullConfig.singleQuery,
       variables () {
         return {
           id: this.$route.params[fullConfig.paramKey]
@@ -114,7 +116,7 @@ export function itemManager (itemName, config) {
           }
           this.$set(this.config, itemName, fullConfig)
         }
-        return fullConfig.create // TODO create as a param as well?
+        return fullConfig.create || !_.has(this.$route.params, fullConfig.paramKey) // TODO create as a router param as well?
       }
     }
   }
@@ -161,7 +163,7 @@ function dataToForm (upsertMutation, data) {
 }
 
 function schemaToObject (schema, selections) {
-  let sels = selections || schema.definitions[1].selectionSet.selections
+  let sels = selections || schema.definitions[1].selectionSet.selections // TODO why 1?
   return sels.reduce((field, selection) => {
     if (selection.kind === 'Field') {
       field[selection.name.value] = selection.selectionSet ? schemaToObject(schema, selection.selectionSet.selections) : null

@@ -60,7 +60,7 @@ export default new Router({
       }
     },
     {
-      path: '/modules/:id',
+      path: '/modules/:moduleId',
       component: Module,
       meta: {
         title: 'Module'
@@ -75,7 +75,7 @@ export default new Router({
       }
     },
     {
-      path: '/modules/:moduleId/stages/:id',
+      path: '/modules/:moduleId/stages/:stageId',
       component: Stage,
       meta: {
         title: 'Stage'

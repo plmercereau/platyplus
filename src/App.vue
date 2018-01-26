@@ -6,8 +6,10 @@
         <v-container fluid
                      style="min-height: 0;"
                      grid-list-lg>
-          <transition name="fade">
-            <router-view></router-view>
+          <transition name="fade" mode="out-in">
+            <keep-alive>
+              <router-view></router-view>
+            </keep-alive>
           </transition>
         </v-container>
       </v-content>

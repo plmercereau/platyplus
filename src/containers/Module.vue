@@ -13,7 +13,7 @@
     <v-btn v-if="edit" @click="upsert">Save</v-btn>
     <v-btn v-if="edit" @click="reset">reset</v-btn>
     <v-btn v-if="edit" @click="cancel">Cancel</v-btn>
-    <v-tabs v-model="$store.state.moduleTab">
+    <v-tabs v-model="currentTab">
       <v-tabs-bar>
 <!--TODO hide v-if="!create" Stages when module being created-->
         <v-tabs-item
@@ -27,7 +27,7 @@
         <v-tabs-slider></v-tabs-slider>
       </v-tabs-bar>
       <v-tabs-items>
-        <v-tabs-content key="General" id="General" @click.stop="$store.commit('setModuleTab', 'General')">
+        <v-tabs-content key="General" id="General">
           <v-card>
             <v-card-text>
               <p v-if="!edit">
@@ -59,7 +59,7 @@
             </v-card-text>
           </v-card>
         </v-tabs-content>
-        <v-tabs-content v-if="!create" key="Stages" id="Stages" @click.stop="$store.commit('setModuleTab', 'Stages')">
+        <v-tabs-content v-if="!create" key="Stages" id="Stages">
           <v-card>
             <v-card-text>
               <v-list subheader>
@@ -88,7 +88,7 @@
             </v-card-text>
           </v-card>
         </v-tabs-content>
-        <v-tabs-content key="Deployments" id="Deployments" @click.stop="$store.commit('setModuleTab', 'Deployments')">
+        <v-tabs-content key="Deployments" id="Deployments">
           <v-card>
             <v-card-text>
               List of org units where it is possible to use the module. One org Unit per line<br/>
@@ -126,23 +126,23 @@
 <script>
   import {ALL_MODULES_QUERY, SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
   import {dataItemMixin, itemManager} from '../mixins/dataItem'
-  const config = {
+  const moduleConfig = {
     upsertMutation: UPSERT_MODULE_MUTATION,
     singleQuery: SINGLE_MODULE_QUERY,
-    collectionQuery: ALL_MODULES_QUERY,
-    paramKey: 'id'
+    collectionQuery: ALL_MODULES_QUERY
   }
 
   export default {
-    name: 'Module',
+    name: 'module',
     mixins: [dataItemMixin],
     data () {
       return {
-        tabs: ['General', 'Stages', 'Deployments']
+        tabs: ['General', 'Stages', 'Deployments'],
+        currentTab: 'General'
       }
     },
     apollo: {
-      ...itemManager('module', config)
+      ...itemManager(moduleConfig)
     }
   }
 </script>

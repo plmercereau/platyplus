@@ -16,7 +16,7 @@
   <v-btn v-if="edit" @click="upsert()">Save</v-btn>
   <v-btn v-if="edit" @click="reset">reset</v-btn>
   <v-btn v-if="edit" @click="cancel">Cancel</v-btn>
-  <v-tabs v-model="$store.state.tabs.stage">
+  <v-tabs v-model="currentTab">
     <v-tabs-bar>
       <v-tabs-item
         v-for="tab in tabs"
@@ -29,7 +29,7 @@
       <v-tabs-slider></v-tabs-slider>
     </v-tabs-bar>
     <v-tabs-items>
-      <v-tabs-content key="General" id="General" @click.stop="$store.commit('setTab',{component:'stage',tab:'General'})">
+      <v-tabs-content key="General" id="General">
         <v-card>
           <v-card-text>
             <v-form v-if="edit" ref="stageForm">
@@ -60,7 +60,7 @@
           </v-card-text>
         </v-card>
       </v-tabs-content>
-      <v-tabs-content key="Next Stages" id="Next Stages" @click.stop="$store.commit('setTab',{componemt:'stage',tab:'Next Stages'})">
+      <v-tabs-content key="Next Stages" id="Next Stages">
         <v-card>
           <v-card-text>
             <v-list subheader>
@@ -79,7 +79,7 @@
           </v-card-text>
         </v-card>
       </v-tabs-content>
-      <v-tabs-content key="Observation Forms" id="Observation Forms" @click.stop="$store.commit('setTab',{component:'stage',tab:'Observation Forms'})">
+      <v-tabs-content key="Observation Forms" id="Observation Forms">
         <v-card>
           <v-card-text>
             List of observation forms
@@ -108,7 +108,6 @@
   const stageConfig = {
     singleQuery: SINGLE_STAGE_QUERY,
     upsertMutation: UPSERT_STAGE_MUTATION,
-    paramKey: 'id', // default value = itemNameId
     formDataName: 'stage', // default value
     formRefName: 'stageForm' // default value
   }
@@ -121,12 +120,13 @@
     mixins: [dataItemMixin],
     data () {
       return {
-        tabs: ['General', 'Next Stages', 'Observation Forms'] // TODO set the tab as a param sent through the router?
+        tabs: ['General', 'Next Stages', 'Observation Forms'], // TODO set the tab as a param sent through the router?
+        currentTab: 'General'
       }
     },
     apollo: {
-      ...itemManager('stage', stageConfig),
-      ...itemManager('module', moduleConfig)
+      ...itemManager(stageConfig),
+      ...itemManager(moduleConfig)
     }
   }
 </script>
