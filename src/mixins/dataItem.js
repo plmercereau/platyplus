@@ -14,7 +14,7 @@ export const dataItemMixin = {
   data () {
     return {
       loading: 0,
-      serverErrors: [], // TODO error handling in another mixin?
+      serverErrors: {}, // TODO error handling in another mixin?
       config: [],
       formData: [],
       itemData: [], // TODO move all item Datas into this array instead of putting them in the component root?
@@ -33,7 +33,9 @@ export const dataItemMixin = {
     reset (itemName) { // Resets the form to the value of the initial value of the item
       let itName = getItemName(this, itemName)
       this.$refs[this.config[itName].formRefName].reset()
-      this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
+      // this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
+      this.formData[this.config[itName].formDataName] = initForm(this, itName)
+      // this.$set(this.formData, this.config[itName].formDataName, (this.config[itName].upsertMutation, this[itName]))
     },
     upsert (itemName) {
       let itName = getItemName(this, itemName)
@@ -67,7 +69,9 @@ export const dataItemMixin = {
             }
           }).then((res) => {
             this[itName] = firstAttribute(res.data, 2)
-            this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
+            // this.$set(this.formData, this.config[itName].formDataName, (this.config[itName].upsertMutation, this[itName]))
+            // this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
+            this.formData[this.config[itName].formDataName] = initForm(this, itName)
             this.edit = false
             if (this.$router.currentRoute.path.indexOf('create') > -1) { // TODO tricky as we can't guess for which item create param is for
               this.$router.replace({path: this.$router.currentRoute.path.replace('create', this[itName].id)})
@@ -86,21 +90,23 @@ export const dataItemMixin = {
         this.config[itName].intervalCount = (this.config[itName].intervalCount || 0) + 1
         if (immediate || this.config[itName].intervalCount > 0) {
           this.$apollo.queries[itName].refetch().then((res) => {
-            this[itName] = res.data[itName]
-            stopInterval(this, itemName)
+            this[itName] = Object.assign({}, this[itName], res.data[itName])
+            // this.$set(this.formData, this.config[itName].formDataName, (this.config[itName].upsertMutation, this[itName]))
+            this.formData[this.config[itName].formDataName] = initForm(this, itName)
+            stopInterval(this, itName)
           })
         }
       } else {
         if (this.config[itName].interval) {
-          stopInterval(this, itemName)
-          this.serverErrors.push(`Error loading the ${itName} element: server is not reachable`)
+          stopInterval(this, itName)
+          this.$set(this.serverErrors, itName, `Error loading the ${itName} element: server is not reachable`)
         }
       }
     }
   },
   computed: {
     status () { // TODO status management in another mixin?
-      if (this.serverErrors.length > 0) return 'error'
+      if (!_.isEmpty(this.serverErrors)) return 'error'
       if (this.loading) return 'loading'
       return 'ok'
     }
@@ -126,14 +132,16 @@ export function itemManager (config) {
       update (data) {
         let item = firstAttribute(data)
         if (fullConfig.upsertMutation) {
+          // this.formData[fullConfig.formDataName] = initForm(this, item)
           this.formData[fullConfig.formDataName] = dataToForm(fullConfig.upsertMutation, item)
         }
         return item
       },
       skip () {
         if (!_.has(this.config, itemName)) {
-          this[itemName] = schemaToObject(fullConfig.singleQuery)
+          this[itemName] = Object.assign({}, this[itemName], schemaToObject(fullConfig.singleQuery))
           fullConfig.create = !_.has(this.$route.params, fullConfig.paramKey)
+          this.$set(this.config, itemName, fullConfig)
           if (fullConfig.upsertMutation) {
             if (fullConfig.create) {
               Object.keys(this.$route.params).map((param) => {
@@ -142,9 +150,9 @@ export function itemManager (config) {
                 }
               })
             }
-            this.$set(this.formData, fullConfig.formDataName, dataToForm(fullConfig.upsertMutation, this[itemName]))
+            this.formData[this.config[itemName].formDataName] = initForm(this, itemName)
+            // this.$set(this.formData, fullConfig.formDataName, dataToForm(fullConfig.upsertMutation, this[itemName]))
           }
-          this.$set(this.config, itemName, fullConfig)
         }
         return fullConfig.create || !_.has(this.$route.params, fullConfig.paramKey) // TODO create as a router param as well?
       },
@@ -211,8 +219,18 @@ function schemaToObject (schema, selections) {
 }
 
 function stopInterval (vm, itemName) {
-  clearInterval(vm.config[itemName].interval)
-  vm.config[itemName].interval = 0
-  vm.loading -= vm.config[itemName].intervalCount
-  vm.config[itemName].intervalCount = 0
+  let itName = getItemName(vm, itemName)
+  clearInterval(vm.config[itName].interval)
+  vm.config[itName].interval = 0
+  vm.loading -= vm.config[itName].intervalCount
+  vm.config[itName].intervalCount = 0
+  if (vm.serverErrors[itName]) vm.$delete(vm.serverErrors, itName)
+}
+
+function initForm (vm, itemName) { // TODO merge with dataToForm?
+  return Object.assign(
+    {},
+    vm.formData[vm.config[itemName].formDataName],
+    dataToForm(vm.config[itemName].upsertMutation, vm[itemName])
+  )
 }
