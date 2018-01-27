@@ -73,11 +73,11 @@ const apolloProvider = new VueApollo({
   defaultClient: apolloClient,
   defaultOptions: {
     $loadingKey: 'loading'
-  },
-  errorHandler (error) {
-    console.log('Global error handler')
-    console.error(error)
   }
+  // errorHandler (error) {
+  // console.log('Global error handler')
+  // console.log(error)
+  // }
 })
 
 const userId = localStorage.getItem(GC_USER_ID)
@@ -98,15 +98,16 @@ Vue.use(Meta) // TODO still being used?
 
 Vue.use(VeeValidate)
 
-Vue.prototype.$super = function (options) {
-  return new Proxy(options, {
-    get: (options, name) => {
-      if (options.methods && name in options.methods) {
-        return options.methods[name].bind(this)
-      }
-    }
-  })
-}
+// INFO used for accessing methods of parent mixin
+// Vue.prototype.$super = function (options) {
+//   return new Proxy(options, {
+//     get: (options, name) => {
+//       if (options.methods && name in options.methods) {
+//         return options.methods[name].bind(this)
+//       }
+//     }
+//   })
+// }
 
 /* eslint-disable no-new */
 window.vm = new Vue({

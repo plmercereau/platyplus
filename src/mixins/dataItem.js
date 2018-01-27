@@ -51,11 +51,8 @@ export const dataItemMixin = {
                   node: updatedNode,
                   __typename: `${updatedNode.__typename}Edge`
                 }
-                if (foundIndex > -1) {
-                  item['edges'].splice(foundIndex, 1, newEdge)
-                } else {
-                  item['edges'].push(newEdge)
-                }
+                if (foundIndex > -1) item['edges'].splice(foundIndex, 1, newEdge)
+                else item['edges'].push(newEdge)
                 store.writeQuery({ query: collectionQuery, data })
               } catch (e) {
                 // console.log('Update error')
@@ -73,6 +70,18 @@ export const dataItemMixin = {
             console.error(error) // TODO handle errors
           })
         }
+      })
+    },
+    refetch (itemName) {
+      let itName = getItemName(this, itemName)
+      this.config[itName].intervalCount += 1
+      this.loading += 1
+      this.$apollo.queries[itName].refetch().then((res) => {
+        this[itName] = res.data[itName]
+        clearInterval(this.config[itName].interval)
+        this.config[itName].interval = 0
+        this.loading -= this.config[itName].intervalCount
+      }).catch((e) => {
       })
     }
   }
@@ -118,6 +127,16 @@ export function itemManager (config) {
           this.$set(this.config, itemName, fullConfig)
         }
         return fullConfig.create || !_.has(this.$route.params, fullConfig.paramKey) // TODO create as a router param as well?
+      },
+      error (error) {
+        if (error.networkError) {
+          console.log('networkerror, starting refetch...') // TODO remove
+          let func = this.refetch
+          func(itemName)
+          this.config[itemName].interval = setInterval(function () {
+            func(itemName)
+          }, 2000)
+        } else console.log(`Error of type ${error.name}`)
       }
     }
   }
@@ -141,24 +160,17 @@ function dataToForm (upsertMutation, data) {
         let fieldData = null
         if (field.endsWith('Ids')) {
           fieldData = data[field.slice(0, -3)]['edges'].reduce((filtered, cursor) => {
-            if (cursor.node.id) {
-              filtered.push(cursor.node.id)
-            }
+            if (cursor.node.id) filtered.push(cursor.node.id)
             return filtered
           }, [])
-        } else if (field.endsWith('Id')) {
-          fieldData = data[field.slice(0, -2)].id
-        } else {
-          fieldData = data[field]
-        }
-        if (fieldData) { node[field] = fieldData }
+        } else if (field.endsWith('Id')) fieldData = data[field.slice(0, -2)].id
+        else fieldData = data[field]
+        if (fieldData) node[field] = fieldData
         return node
       }, {})
   } catch (e) {
     console.log('Error in dataToForm')
-    if (!upsertMutation) {
-      console.log('No upsert mutation has been defined in the configuration')
-    }
+    if (!upsertMutation) console.log('No upsert mutation has been defined in the configuration')
     return _.clone(data)
   }
 }
