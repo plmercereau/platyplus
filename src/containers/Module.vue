@@ -44,7 +44,7 @@
                     data-vv-name="name"
                     required
                     v-validate="'required|min:3|max:20'"
-                    :error-messages="serverErrors.collect('name')"
+                    :error-messages="errors.collect('name')"
                   ></v-text-field>
                   <v-text-field
                     label="Short description"
@@ -55,9 +55,9 @@
                     data-vv-as="short description"
                     required
                     v-validate="'required|min:10|max:280'"
-                    :error-messages="serverErrors.collect('shortDescription')"
+                    :error-messages="errors.collect('shortDescription')"
                   ></v-text-field>
-                  <!--<v-btn :disabled="$validator.serverErrors.any()" @click="upsert">Save</v-btn>-->
+                  <!--<v-btn :disabled="$validator.errors.any()" @click="upsert">Save</v-btn>-->
                 </v-form>
               </v-card-text>
             </v-card>
