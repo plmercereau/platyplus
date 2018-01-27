@@ -1,7 +1,8 @@
 <template>
   <div>
-    <loading-page v-if="loading" />
-    <v-container grid-list-md v-if="!loading" transition="fade">
+    <loading-page v-if="status === 'loading'" ></loading-page>
+    <errors-page v-if="status === 'error'" :errors="serverErrors"></errors-page>
+    <v-container v-if="status === 'ok'" grid-list-md>
       <v-breadcrumbs large>
         <v-icon slot="divider">chevron_right</v-icon>
         <v-breadcrumbs-item to="/modules">
@@ -42,7 +43,7 @@
                     data-vv-name="name"
                     required
                     v-validate="'required|min:3|max:20'"
-                    :error-messages="errors.collect('name')"
+                    :error-messages="serverErrors.collect('name')"
                   ></v-text-field>
                   <v-text-field
                     label="Short description"
@@ -53,7 +54,7 @@
                     data-vv-as="short description"
                     required
                     v-validate="'required|min:10|max:280'"
-                    :error-messages="errors.collect('shortDescription')"
+                    :error-messages="serverErrors.collect('shortDescription')"
                   ></v-text-field>
                 </v-form>
                 <p v-if="!edit">
@@ -109,7 +110,6 @@
 <script>
   import {SINGLE_MODULE_QUERY, SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
   import {dataItemMixin, itemManager} from '../mixins/dataItem'
-  import LoadingPage from '../components/LoadingPage'
 
   const stageConfig = {
     singleQuery: SINGLE_STAGE_QUERY,
@@ -122,7 +122,6 @@
   }
 
   export default {
-    components: {LoadingPage},
     name: 'stage',
     mixins: [dataItemMixin],
     data () {

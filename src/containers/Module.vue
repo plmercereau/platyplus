@@ -1,7 +1,8 @@
 <template>
   <div>
-    <loading-page v-if="loading" />
-    <v-container grid-list-md v-if="!loading" transition="fade">
+    <loading-page v-if="status === 'loading'" ></loading-page>
+    <errors-page v-if="status === 'error'" :errors="serverErrors"></errors-page>
+    <v-container v-if="status === 'ok'" grid-list-md>
       <v-breadcrumbs large>
         <v-icon slot="divider">chevron_right</v-icon>
         <v-breadcrumbs-item to="/modules">
@@ -43,7 +44,7 @@
                     data-vv-name="name"
                     required
                     v-validate="'required|min:3|max:20'"
-                    :error-messages="errors.collect('name')"
+                    :error-messages="serverErrors.collect('name')"
                   ></v-text-field>
                   <v-text-field
                     label="Short description"
@@ -54,9 +55,9 @@
                     data-vv-as="short description"
                     required
                     v-validate="'required|min:10|max:280'"
-                    :error-messages="errors.collect('shortDescription')"
+                    :error-messages="serverErrors.collect('shortDescription')"
                   ></v-text-field>
-                  <!--<v-btn :disabled="$validator.errors.any()" @click="upsert">Save</v-btn>-->
+                  <!--<v-btn :disabled="$validator.serverErrors.any()" @click="upsert">Save</v-btn>-->
                 </v-form>
               </v-card-text>
             </v-card>
@@ -130,7 +131,6 @@
 <script>
   import {ALL_MODULES_QUERY, SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
   import {dataItemMixin, itemManager} from '../mixins/dataItem'
-  import LoadingPage from '../components/LoadingPage'
 
   const moduleConfig = {
     upsertMutation: UPSERT_MODULE_MUTATION,
@@ -139,7 +139,6 @@
   }
 
   export default {
-    components: {LoadingPage},
     name: 'module',
     mixins: [dataItemMixin],
     data () {

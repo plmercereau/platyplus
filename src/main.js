@@ -62,7 +62,9 @@ const link = split(
 
 const apolloClient = new ApolloClient({
   link: concat(authMiddleware, link),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache({
+    // dataIdFromObject: o => o.uuid // TODO check what is means
+  })
 })
 
 Vue.use(VueApollo)

@@ -1,13 +1,20 @@
 import _ from 'lodash'
 import {firstAttribute} from '../utils'
+import {REFETCH_ATTEMPS, REFETCH_INTERVAL} from '../constants/settings'
+import LoadingPage from '../components/LoadingPage'
+import ErrorsPage from '../components/ErrorsPage'
 
 export const dataItemMixin = {
+  components: {
+    LoadingPage,
+    ErrorsPage},
   props: {
     create: Boolean // available from the url through vue-router config
   },
   data () {
     return {
       loading: 0,
+      serverErrors: [], // TODO error handling in another mixin?
       config: [],
       formData: [],
       itemData: [], // TODO move all item Datas into this array instead of putting them in the component root?
@@ -67,22 +74,35 @@ export const dataItemMixin = {
             }
           }).catch((error) => {
             console.log('error in the upsert')
-            console.error(error) // TODO handle errors
+            console.error(error) // TODO handle serverErrors
           })
         }
       })
     },
-    refetch (itemName) {
+    refetch (itemName, immediate = true) {
       let itName = getItemName(this, itemName)
-      this.config[itName].intervalCount += 1
-      this.loading += 1
-      this.$apollo.queries[itName].refetch().then((res) => {
-        this[itName] = res.data[itName]
-        clearInterval(this.config[itName].interval)
-        this.config[itName].interval = 0
-        this.loading -= this.config[itName].intervalCount
-      }).catch((e) => {
-      })
+      if ((REFETCH_ATTEMPS === -1) || ((this.config[itName].intervalCount || 0) < REFETCH_ATTEMPS)) {
+        this.loading += 1
+        this.config[itName].intervalCount = (this.config[itName].intervalCount || 0) + 1
+        if (immediate || this.config[itName].intervalCount > 0) {
+          this.$apollo.queries[itName].refetch().then((res) => {
+            this[itName] = res.data[itName]
+            stopInterval(this, itemName)
+          })
+        }
+      } else {
+        if (this.config[itName].interval) {
+          stopInterval(this, itemName)
+          this.serverErrors.push(`Error loading the ${itName} element: server is not reachable`)
+        }
+      }
+    }
+  },
+  computed: {
+    status () { // TODO status management in another mixin?
+      if (this.serverErrors.length > 0) return 'error'
+      if (this.loading) return 'loading'
+      return 'ok'
     }
   }
 }
@@ -132,10 +152,10 @@ export function itemManager (config) {
         if (error.networkError) {
           console.log('networkerror, starting refetch...') // TODO remove
           let func = this.refetch
-          func(itemName)
+          func(itemName, false)
           this.config[itemName].interval = setInterval(function () {
             func(itemName)
-          }, 2000)
+          }, REFETCH_INTERVAL)
         } else console.log(`Error of type ${error.name}`)
       }
     }
@@ -188,4 +208,11 @@ function schemaToObject (schema, selections) {
       return schemaToObject(schema, definition.selectionSet.selections)
     }
   }, {})
+}
+
+function stopInterval (vm, itemName) {
+  clearInterval(vm.config[itemName].interval)
+  vm.config[itemName].interval = 0
+  vm.loading -= vm.config[itemName].intervalCount
+  vm.config[itemName].intervalCount = 0
 }
