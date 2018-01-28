@@ -2,11 +2,11 @@
   <v-container>
     Some serverErrors occurred in loading the page:
     <ul>
-      <li v-for="error in errors">
+      <li v-for="error in serverErrors">
         {{error}}
       </li>
     </ul>
-    <!--<v-btn @click="refetch">Try again</v-btn>-->
+    <v-btn @click="refetch">Try again</v-btn>
   </v-container>
 </template>
 
@@ -14,13 +14,13 @@
     export default {
       name: 'serverErrors-page',
       props: {
-        errors: Array
+        serverErrors: Object
+      },
+      methods: {
+        refetch () {
+          this.$parent.refetchAll() // INFO check is the use of this.$parent is recommended
+        }
       }
-      // methods: { // TODO implement
-      //   refetch () {
-      //     this.$parent.refetch('module') // How do I call a parent method?
-      //   }
-      // }
     }
 </script>
 

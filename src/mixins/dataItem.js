@@ -102,6 +102,15 @@ export const dataItemMixin = {
           this.$set(this.serverErrors, itName, `Error loading the ${itName} element: server is not reachable`)
         }
       }
+    },
+    refetchAll () {
+      let errors = this.serverErrors
+      this.serverErrors = {}
+      Object.keys(this.config).map((itemName) => {
+        if (errors[itemName]) {
+          startInterval(this, this.refetch, itemName)
+        }
+      })
     }
   },
   computed: {
@@ -159,11 +168,7 @@ export function itemManager (config) {
       error (error) {
         if (error.networkError) {
           console.log('networkerror, starting refetch...') // TODO remove
-          let func = this.refetch
-          func(itemName, false)
-          this.config[itemName].interval = setInterval(function () {
-            func(itemName)
-          }, REFETCH_INTERVAL)
+          startInterval(this, this.refetch, itemName)
         } else console.log(`Error of type ${error.name}`)
       }
     }
@@ -173,7 +178,7 @@ export function itemManager (config) {
 
 function getItemName (vm, data) {
   let firstEditable = Object.keys(vm.config).find((el) => {
-    return vm.config[el].upsertMutation
+    return vm.config[el].upsertMutation // TODO why editables only?
   })
   return _.isString(data) ? data : firstEditable
 }
@@ -216,6 +221,13 @@ function schemaToObject (schema, selections) {
       return schemaToObject(schema, definition.selectionSet.selections)
     }
   }, {})
+}
+
+function startInterval (vm, func, itemName) { // TODO convert itemName into generic params of func
+  func(itemName, false)
+  vm.config[itemName].interval = setInterval(function () {
+    func(itemName)
+  }, REFETCH_INTERVAL)
 }
 
 function stopInterval (vm, itemName) {
