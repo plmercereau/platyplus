@@ -119,6 +119,11 @@ export const dataItemMixin = {
       if (this.loading) return 'loading'
       return 'ok'
     }
+  },
+  beforeDestroy () {
+    Object.keys(this.config).map((itemName) => {
+      if (this.config[itemName].interval) clearInterval(this.config[itemName].interval)
+    })
   }
 }
 
