@@ -1,7 +1,7 @@
 <template>
   <div>
-    <loading-page v-if="status === 'loading'" ></loading-page>
-    <errors-page v-if="status === 'error'" :errors="serverErrors"></errors-page>
+    <loading-page v-if="status === 'loading'"></loading-page>
+    <errors-page v-if="status === 'error'"></errors-page>
     <v-container v-if="status === 'ok'" grid-list-md>
       <v-breadcrumbs large>
         <v-icon slot="divider">chevron_right</v-icon>
@@ -43,7 +43,7 @@
                     data-vv-name="name"
                     required
                     v-validate="'required|min:3|max:20'"
-                    :error-messages="serverErrors.collect('name')"
+                    :error-messages="errors.collect('name')"
                   ></v-text-field>
                   <v-text-field
                     label="Short description"
@@ -54,7 +54,7 @@
                     data-vv-as="short description"
                     required
                     v-validate="'required|min:10|max:280'"
-                    :error-messages="serverErrors.collect('shortDescription')"
+                    :error-messages="errors.collect('shortDescription')"
                   ></v-text-field>
                 </v-form>
                 <p v-if="!edit">

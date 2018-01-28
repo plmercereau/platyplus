@@ -1,7 +1,7 @@
 <template>
   <div>
-    <loading-page v-if="status === 'loading'" ></loading-page>
-    <errors-page v-if="status === 'error'" :serverErrors="serverErrors"></errors-page>
+    <loading-page v-if="status === 'loading'"></loading-page>
+    <errors-page v-if="status === 'error'"></errors-page>
     <v-container v-if="status === 'ok'" grid-list-md>
       <v-breadcrumbs large>
         <v-icon slot="divider">chevron_right</v-icon>

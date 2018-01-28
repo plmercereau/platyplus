@@ -14,10 +14,8 @@ export const dataItemMixin = {
   data () {
     return {
       loading: 0,
-      serverErrors: {}, // TODO error handling in another mixin?
       config: [],
       formData: [],
-      itemData: [], // TODO move all item Datas into this array instead of putting them in the component root?
       edit: this.create // edit mode: turns on/off the forms inputs // TODO move to form level?
     }
   },
@@ -33,9 +31,7 @@ export const dataItemMixin = {
     reset (itemName) { // Resets the form to the value of the initial value of the item
       let itName = getItemName(this, itemName)
       this.$refs[this.config[itName].formRefName].reset()
-      // this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
-      this.formData[this.config[itName].formDataName] = initForm(this, itName)
-      // this.$set(this.formData, this.config[itName].formDataName, (this.config[itName].upsertMutation, this[itName]))
+      this.$set(this.formData, this.config[itName].formDataName, dataToForm(this.config[itName].upsertMutation, this[itName]))
     },
     upsert (itemName) {
       let itName = getItemName(this, itemName)
@@ -69,9 +65,7 @@ export const dataItemMixin = {
             }
           }).then((res) => {
             this[itName] = firstAttribute(res.data, 2)
-            // this.$set(this.formData, this.config[itName].formDataName, (this.config[itName].upsertMutation, this[itName]))
-            // this.formData[this.config[itName].formDataName] = dataToForm(this.config[itName].upsertMutation, this[itName])
-            this.formData[this.config[itName].formDataName] = initForm(this, itName)
+            this.$set(this.formData, this.config[itName].formDataName, dataToForm(this.config[itName].upsertMutation, this[itName]))
             this.edit = false
             if (this.$router.currentRoute.path.indexOf('create') > -1) { // TODO tricky as we can't guess for which item create param is for
               this.$router.replace({path: this.$router.currentRoute.path.replace('create', this[itName].id)})
@@ -91,39 +85,32 @@ export const dataItemMixin = {
         if (immediate || this.config[itName].intervalCount > 0) {
           this.$apollo.queries[itName].refetch().then((res) => {
             this[itName] = Object.assign({}, this[itName], res.data[itName])
-            // this.$set(this.formData, this.config[itName].formDataName, (this.config[itName].upsertMutation, this[itName]))
-            this.formData[this.config[itName].formDataName] = initForm(this, itName)
+            if (this.config[itName].upsertMutation) this.$set(this.formData, this.config[itName].formDataName, dataToForm(this.config[itName].upsertMutation, this[itName]))
             stopInterval(this, itName)
+            this.$set(this.config[itName], 'serverError', false)
           })
         }
       } else {
         if (this.config[itName].interval) {
           stopInterval(this, itName)
-          this.$set(this.serverErrors, itName, `Error loading the ${itName} element: server is not reachable`)
+          this.$set(this.config[itName], 'serverError', true)
         }
       }
     },
     refetchAll () {
-      let errors = this.serverErrors
-      this.serverErrors = {}
-      Object.keys(this.config).map((itemName) => {
-        if (errors[itemName]) {
-          startInterval(this, this.refetch, itemName)
-        }
+      Object.keys(this.config).map((el) => {
+        startInterval(this, this.refetch, this.config[el].itemName)
       })
     }
   },
   computed: {
     status () { // TODO status management in another mixin?
-      if (!_.isEmpty(this.serverErrors)) return 'error'
       if (this.loading) return 'loading'
+      if (Object.keys(this.config).find((el) => {
+        return this.config[el].serverError
+      })) return 'error'
       return 'ok'
     }
-  },
-  beforeDestroy () {
-    Object.keys(this.config).map((itemName) => {
-      if (this.config[itemName].interval) clearInterval(this.config[itemName].interval)
-    })
   }
 }
 
@@ -146,8 +133,7 @@ export function itemManager (config) {
       update (data) {
         let item = firstAttribute(data)
         if (fullConfig.upsertMutation) {
-          // this.formData[fullConfig.formDataName] = initForm(this, item)
-          this.formData[fullConfig.formDataName] = dataToForm(fullConfig.upsertMutation, item)
+          this.$set(this.formData, fullConfig.formDataName, dataToForm(fullConfig.upsertMutation, item))
         }
         return item
       },
@@ -164,8 +150,7 @@ export function itemManager (config) {
                 }
               })
             }
-            this.formData[this.config[itemName].formDataName] = initForm(this, itemName)
-            // this.$set(this.formData, fullConfig.formDataName, dataToForm(fullConfig.upsertMutation, this[itemName]))
+            this.$set(this.formData, fullConfig.formDataName, dataToForm(fullConfig.upsertMutation, this[itemName]))
           }
         }
         return fullConfig.create || !_.has(this.$route.params, fullConfig.paramKey) // TODO create as a router param as well?
@@ -241,13 +226,4 @@ function stopInterval (vm, itemName) {
   vm.config[itName].interval = 0
   vm.loading -= vm.config[itName].intervalCount
   vm.config[itName].intervalCount = 0
-  if (vm.serverErrors[itName]) vm.$delete(vm.serverErrors, itName)
-}
-
-function initForm (vm, itemName) { // TODO merge with dataToForm?
-  return Object.assign(
-    {},
-    vm.formData[vm.config[itemName].formDataName],
-    dataToForm(vm.config[itemName].upsertMutation, vm[itemName])
-  )
 }
