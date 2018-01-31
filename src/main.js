@@ -1,11 +1,3 @@
-// Apollo imports
-import ApolloClient from 'apollo-client'
-import { HttpLink } from 'apollo-link-http'
-import { ApolloLink, concat, split } from 'apollo-link'
-import { InMemoryCache } from 'apollo-cache-inmemory'
-import { WebSocketLink } from 'apollo-link-ws'
-import { getMainDefinition } from 'apollo-utilities'
-
 // Vue imports
 import Vue from 'vue'
 import VueApollo from 'vue-apollo'
@@ -19,57 +11,20 @@ import 'vuetify/dist/vuetify.min.css'
 // Component imports
 import App from './App'
 
-import { GC_USER_ID, GC_AUTH_TOKEN } from './constants/settings'
-
-const httpLink = new HttpLink({
-  uri: 'http://localhost:8000/graphql/',
-  options: {
-    mode: 'no-cors'
-  }
-})
-
-const token = localStorage.getItem(GC_AUTH_TOKEN) || null
-const authMiddleware = new ApolloLink((operation, forward) => {
-  // add the authorization to the headers
-  operation.setContext({
-    headers: {
-      authorization: `Bearer ${token}`
-    }
-  })
-  return forward(operation)
-})
-
-// Set up subscription
-const wsLink = new WebSocketLink({ // TODO move to graphene subscriptions
-  uri: `wss://subscriptions.graph.cool/v1/cjc51cixb014s0181tzq5yc8t`,
-  options: {
-    reconnect: true,
-    mode: 'no-cors'
-  }
-})
-
-// using the ability to split links, you can send data to each link
-// depending on what kind of operation is being sent
-const link = split(
-  // split based on operation type
-  ({ query }) => {
-    const { kind, operation } = getMainDefinition(query)
-    return kind === 'OperationDefinition' && operation === 'subscription'
-  },
-  wsLink,
-  httpLink
-)
-
-const apolloClient = new ApolloClient({
-  link: concat(authMiddleware, link),
-  cache: new InMemoryCache({
-    // dataIdFromObject: o => o.uuid // TODO check what is means
-  })
-})
-
-Vue.use(VueApollo)
+import { GC_USER_ID } from './constants/settings'
+import GraphQLData from './plugins/graphql-data'
+import apolloClient from './plugins/apollo-client'
 
 Vue.config.productionTip = false
+const userId = localStorage.getItem(GC_USER_ID)
+
+Vue.use(Meta) // TODO still being used?
+
+Vue.use(VeeValidate)
+
+Vue.use(VueApollo, {apolloClient})
+
+Vue.use(GraphQLData, {store})
 
 const apolloProvider = new VueApollo({
   defaultClient: apolloClient,
@@ -82,8 +37,6 @@ const apolloProvider = new VueApollo({
   // }
 })
 
-const userId = localStorage.getItem(GC_USER_ID)
-
 Vue.use(Vuetify, {
   theme: {
     // primary: '#795548',
@@ -95,10 +48,6 @@ Vue.use(Vuetify, {
     // warning: '#FFC107'
   }
 })
-
-Vue.use(Meta) // TODO still being used?
-
-Vue.use(VeeValidate)
 
 // INFO used for accessing methods of parent mixin
 // Vue.prototype.$super = function (options) {
