@@ -1,22 +1,14 @@
-<template>
-  <v-app id="app" dark>
-      <app-navigation></app-navigation>
-      <app-tool-bar :title="$store.state.title"></app-tool-bar>
-      <v-content>
-        <v-container fluid
-                     style="min-height: 0;"
-                     grid-list-lg>
-          <transition name="fade" mode="out-in">
-            <keep-alive>
-              <router-view></router-view>
-            </keep-alive>
-          </transition>
-        </v-container>
-      </v-content>
-      <v-footer app fixed>
-        <span>&copy; 2018</span>
-      </v-footer>
-    </v-app>
+<template lang="pug">
+  v-app(id="app" dark)
+    app-navigation
+    app-tool-bar(:title="$store.state.title")
+    v-content
+      v-container(fluid style="min-height: 0;" grid-list-lg)
+        transition(name="fade" mode="out-in")
+          keep-alive
+            router-view
+    v-footer(app fixed)
+      span &copy; 2018
 </template>
 
 <script>
