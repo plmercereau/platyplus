@@ -1,9 +1,10 @@
 import * as types from '../store/mutation-types'
 import _ from 'lodash'
 import {QUEUE_SCHEDULE} from '../constants/settings'
+import {firstAttribute} from '../utils'
 
 const GraphQLData = {
-  install (Vue, {store}) {
+  install (Vue, {store, apolloClient}) {
     console.log('GraphQLData plugin is loaded')
     Vue.processQueue = () => {
       setImmediate(function () {
@@ -11,11 +12,53 @@ const GraphQLData = {
         if (!store.state.graphqlQueue.mutationsQueueLock && !_.isEmpty(queue)) {
           store.commit(types.LOCK_MUTATION_QUEUE)
           let cursor = queue[0]
-          console.log(cursor.id) // TODO process the gql mutation
-          store.commit(types.SHIFT_MUTATION)
+          Vue.prototype.upsertMutation(cursor.config, cursor.formData).then((res) => {
+            store.commit(types.SHIFT_MUTATION)
+            setImmediate(Vue.processQueue())
+          }).catch((e) => {
+            console.log('erreur dans la queue - upsert')
+          })
           store.commit(types.UNLOCK_MUTATION_QUEUE)
-          setImmediate(Vue.processQueue())
         }
+      })
+    }
+
+    Vue.pushToQueue = (config, formData) => {
+      store.commit(types.PUSH_MUTATION, {id: `${config.itemName}#${formData.id}`, config, formData})
+    }
+
+    Vue.prototype.upsertMutation = async (config, formData) => {
+      let collectionQuery = config.collectionQuery
+      return apolloClient.mutate({
+        mutation: config.upsertMutation,
+        variables: formData,
+        update (store, updatedData) {
+          // TODO create cache query when we just created an item i.e. when the colleciton query is  not existing?
+          // TODO check if config.collectionQuery exists
+          // TODO reload mode when saving a stage, or update module.stages in the cache?
+          try {
+            const data = store.readQuery({ query: collectionQuery }) // TODO sort by name
+            let updatedNode = firstAttribute(updatedData.data, 2)
+            let item = firstAttribute(data)
+            let foundIndex = item['edges'].findIndex((element) => {
+              return element.node.id === updatedNode.id
+            })
+            let newEdge = {
+              node: updatedNode,
+              __typename: `${updatedNode.__typename}Edge`
+            }
+            if (foundIndex > -1) item['edges'].splice(foundIndex, 1, newEdge)
+            else item['edges'].push(newEdge)
+            store.writeQuery({ query: collectionQuery, data })
+          } catch (e) {
+            // console.log('Update error')
+          }
+        }
+      }).then((res) => {
+        return res
+      }).catch((e) => {
+        Vue.pushToQueue(config, formData)
+        throw e.message
       })
     }
 

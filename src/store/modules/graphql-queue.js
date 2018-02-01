@@ -3,7 +3,6 @@ import * as types from '../mutation-types'
 // initial state
 const state = {
   mutationsQueue: [],
-  mutationsQueueInterval: null,
   mutationsQueueLock: null
 }
 
@@ -19,7 +18,7 @@ const actions = {
 // mutations
 const mutations = {
   [types.PUSH_MUTATION] (state, mutation) {
-    // state.checkoutStatus = null
+    // TODO pushed element is replaced if existing
     const record = state.mutationsQueue.find(cursor => cursor.id === mutation.id)
     if (!record) {
       state.mutationsQueue.push(mutation)

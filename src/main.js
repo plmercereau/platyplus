@@ -24,7 +24,7 @@ Vue.use(VeeValidate)
 
 Vue.use(VueApollo, {apolloClient})
 
-Vue.use(GraphQLData, {store})
+Vue.use(GraphQLData, {store, apolloClient})
 
 const apolloProvider = new VueApollo({
   defaultClient: apolloClient,

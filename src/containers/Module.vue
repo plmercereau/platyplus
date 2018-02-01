@@ -8,7 +8,7 @@
         v-breadcrumbs-item(to="/modules") Modules
         v-breadcrumbs-item(to="'/modules' + module.id") {{module.name || 'New'}}
       v-btn(v-if="!edit", @click="edit=!edit") Edit
-      v-btn(v-if="edit", @click="upsert") Save
+      v-btn(v-if="edit", @click="upsertForm") Save
       v-btn(v-if="edit", @click="reset") Reset
       v-btn(v-if="edit", @click="cancel") Cancel
       v-tabs(v-model="currentTab")
@@ -71,6 +71,7 @@
   import {ALL_MODULES_QUERY, SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
   import {dataItemMixin, itemManager} from '../mixins/dataItem'
   import LoadingPage from '../components/LoadingPage'
+  import ErrorsPage from '../components/ErrorsPage'
 
   const moduleConfig = {
     upsertMutation: UPSERT_MODULE_MUTATION,
@@ -81,7 +82,7 @@
   export default {
     name: 'module',
     mixins: [dataItemMixin],
-    components: {LoadingPage},
+    components: {LoadingPage, ErrorsPage},
     data () {
       return {
         tabs: ['General', 'Stages', 'Deployments'],

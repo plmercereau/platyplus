@@ -1,13 +1,8 @@
 import _ from 'lodash'
 import {firstAttribute} from '../utils'
 import {REFETCH_ATTEMPS, REFETCH_INTERVAL} from '../constants/settings'
-import LoadingPage from '../components/LoadingPage'
-import ErrorsPage from '../components/ErrorsPage'
 
 export const dataItemMixin = {
-  components: {
-    LoadingPage,
-    ErrorsPage},
   props: {
     create: Boolean // available from the url through vue-router config
   },
@@ -33,47 +28,20 @@ export const dataItemMixin = {
       this.$refs[this.config[itName].formRefName].reset()
       this.$set(this.formData, this.config[itName].formDataName, dataToForm(this.config[itName].upsertMutation, this[itName]))
     },
-    upsert (itemName) {
+    upsertForm (itemName) {
       let itName = getItemName(this, itemName)
       this.$validator.validateAll().then((result) => {
         if (result) {
-          let collectionQuery = this.config[itName].collectionQuery
-          this.$apollo.mutate({
-            mutation: this.config[itName].upsertMutation,
-            variables: this.formData[this.config[itName].formDataName],
-            update (store, updatedData) {
-              // TODO create cache query when we just created an item i.e. when the colleciton query is  not existing?
-              // TODO check if config.collectionQuery exists
-              // TODO reload mode when saving a stage, or update module.stages in the cache?
-              try {
-                const data = store.readQuery({ query: collectionQuery }) // TODO sort by name
-                let updatedNode = firstAttribute(updatedData.data, 2)
-                let item = firstAttribute(data)
-                let foundIndex = item['edges'].findIndex((element) => {
-                  return element.node.id === updatedNode.id
-                })
-                let newEdge = {
-                  node: updatedNode,
-                  __typename: `${updatedNode.__typename}Edge`
-                }
-                if (foundIndex > -1) item['edges'].splice(foundIndex, 1, newEdge)
-                else item['edges'].push(newEdge)
-                store.writeQuery({ query: collectionQuery, data })
-              } catch (e) {
-                // console.log('Update error')
-              }
-            }
-          }).then((res) => {
-            this[itName] = firstAttribute(res.data, 2)
+          this.upsertMutation(this.config[itName], this.formData[this.config[itName].formDataName]).then((res) => {
+            this[itemName] = firstAttribute(res.data, 2)
             this.$set(this.formData, this.config[itName].formDataName, dataToForm(this.config[itName].upsertMutation, this[itName]))
-            this.edit = false
             if (this.$router.currentRoute.path.indexOf('create') > -1) { // TODO tricky as we can't guess for which item create param is for
               this.$router.replace({path: this.$router.currentRoute.path.replace('create', this[itName].id)})
             }
-          }).catch((error) => {
+          }).catch(() => {
             console.log('error in the upsert')
-            console.error(error) // TODO handle serverErrors
           })
+          this.edit = false
         }
       })
     },
@@ -193,7 +161,7 @@ function dataToForm (upsertMutation, data) {
       }, {})
   } catch (e) {
     console.log('Error in dataToForm')
-    if (!upsertMutation) console.log('No upsert mutation has been defined in the configuration')
+    if (!upsertMutation) console.log('No upsertForm mutation has been defined in the configuration')
     return _.clone(data)
   }
 }

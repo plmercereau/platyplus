@@ -9,7 +9,7 @@
         v-breadcrumbs-item(:to="'/modules/' + module.id") {{module.name}}
         v-breadcrumbs-item {{stage.name || 'New'}}
       v-btn(v-if="!edit", @click="edit=!edit") Edit
-      v-btn(v-if="edit", @click="upsert") Save
+      v-btn(v-if="edit", @click="upsertForm") Save
       v-btn(v-if="edit", @click="reset") Reset
       v-btn(v-if="edit", @click="cancel") Cancel
       v-tabs(v-model="currentTab")
@@ -58,6 +58,8 @@
 <script>
   import {SINGLE_MODULE_QUERY, SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
   import {dataItemMixin, itemManager} from '../mixins/dataItem'
+  import LoadingPage from '../components/LoadingPage'
+  import ErrorsPage from '../components/ErrorsPage'
 
   const stageConfig = {
     singleQuery: SINGLE_STAGE_QUERY,
@@ -72,6 +74,7 @@
   export default {
     name: 'stage',
     mixins: [dataItemMixin],
+    components: {LoadingPage, ErrorsPage},
     data () {
       return {
         tabs: ['General', 'Next Stages', 'Observation Forms'], // TODO set the tab as a param sent through the router?
