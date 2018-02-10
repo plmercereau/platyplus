@@ -15,7 +15,7 @@
 
 <script>
   import { ALL_LINKS_QUERY, CREATE_VOTE_MUTATION } from '../constants/graphql'
-  import { GC_USER_ID, LINKS_PER_PAGE } from '../constants/settings'
+  import { USER_ID, LINKS_PER_PAGE } from '../constants/settings'
   import { timeDifferenceForDate } from '../utils'
   export default {
     name: 'LinkItem',
@@ -39,7 +39,7 @@
     props: ['link', 'index', 'pageNumber'],
     methods: {
       voteForLink () {
-        const userId = localStorage.getItem(GC_USER_ID)
+        const userId = localStorage.getItem(USER_ID)
         const voterIds = this.link.votes.map(vote => vote.user.id)
         if (voterIds.includes(userId)) {
           alert(`User (${userId}) already voted for this link.`)

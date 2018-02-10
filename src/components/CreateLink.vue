@@ -18,7 +18,7 @@
 
 <script>
   import { ALL_LINKS_QUERY, CREATE_LINK_MUTATION } from '../constants/graphql'
-  import { GC_USER_ID } from '../constants/settings'
+  import { USER_ID } from '../constants/settings'
   export default {
     name: 'CreateLink',
     data () {
@@ -29,7 +29,7 @@
     },
     methods: {
       createLink () {
-        const postedById = localStorage.getItem(GC_USER_ID)
+        const postedById = localStorage.getItem(USER_ID)
         if (!postedById) {
           console.error('No user logged in')
           return

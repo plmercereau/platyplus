@@ -1,5 +1,5 @@
 import {WebSocketLink} from 'apollo-link-ws/lib/index'
-import {GC_AUTH_TOKEN} from '../constants/settings'
+import {AUTH_TOKEN} from '../constants/settings'
 import {ApolloLink, concat, split} from 'apollo-link/lib/index'
 import {InMemoryCache} from 'apollo-cache-inmemory/lib/index'
 import {getMainDefinition} from 'apollo-utilities/lib/index'
@@ -13,12 +13,12 @@ const httpLink = new HttpLink({
   }
 })
 
-const token = localStorage.getItem(GC_AUTH_TOKEN) || null
+const token = localStorage.getItem(AUTH_TOKEN) || null
 const authMiddleware = new ApolloLink((operation, forward) => {
   // add the authorization to the headers
   operation.setContext({
     headers: {
-      authorization: `Bearer ${token}`
+      authorization: `JWT ${token}`
     }
   })
   return forward(operation)

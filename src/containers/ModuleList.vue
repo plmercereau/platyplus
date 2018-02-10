@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-layout
+  v-layout(row wrap)
     module-item(v-for="(module, index) in modules.edges", :key="module.node.id", :module="module.node", :index="index")
 </template>
 

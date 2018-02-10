@@ -12,15 +12,13 @@
 </template>
 
 <script>
-  import AppHeader from './components/AppHeader'
   import AppNavigation from './components/AppNavigation'
   import AppToolBar from './components/AppToolBar'
   export default {
     name: 'app',
     components: {
       AppToolBar,
-      AppNavigation,
-      AppHeader
+      AppNavigation
     },
     metaInfo () {
       return {

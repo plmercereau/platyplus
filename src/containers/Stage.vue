@@ -30,11 +30,11 @@
             v-card
               v-card-text
                 v-list(subheader)
-                  v-list-tile(v-for="stage in module.stages.edges", v-bind:key="stage.node.id", @click="", :to="'/modules/' + module.id + '/stages/' + stage.node.id")
+                  v-list-tile(v-for="cursor in module.stages.edges", v-bind:key="cursor.node.id", @click="")
                     v-list-tile-content
-                      v-list-tile-title {{stage.node.name}}
+                      v-list-tile-title {{cursor.node.name}}
                     v-list-tile-action
-                      v-checkbox(:disabled="!edit", v-model="formData.stage.nextStagesIds", :value="stage.node.id")
+                      v-checkbox(:disabled="!edit", v-model="formData.stage.nextStagesIds", :value="cursor.node.id")
                   v-divider
           v-tabs-content(key="Observation Forms", id="Observation Forms")
             v-card

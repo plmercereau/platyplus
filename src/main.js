@@ -11,12 +11,12 @@ import 'vuetify/dist/vuetify.min.css'
 // Component imports
 import App from './App'
 
-import { GC_USER_ID } from './constants/settings'
-import GraphQLData from './plugins/graphql-data'
+import { USER_ID } from './constants/settings'
+import GraphQLHelper from './plugins/graphql-helper'
 import apolloClient from './plugins/apollo-client'
 
 Vue.config.productionTip = false
-const userId = localStorage.getItem(GC_USER_ID)
+const userId = localStorage.getItem(USER_ID)
 
 Vue.use(Meta) // TODO still being used?
 
@@ -24,7 +24,7 @@ Vue.use(VeeValidate)
 
 Vue.use(VueApollo, {apolloClient})
 
-Vue.use(GraphQLData, {store, apolloClient})
+Vue.use(GraphQLHelper, {store, apolloClient})
 
 const apolloProvider = new VueApollo({
   defaultClient: apolloClient,

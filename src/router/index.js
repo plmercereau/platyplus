@@ -1,14 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import AppLogin from '../components/AppLogin'
-import CreateLink from '../components/CreateLink'
-import LinkList from '../components/LinkList'
-import ModuleList from '../containers/ModuleList'
-// import Module from '../components/Module'
-import Module from '../containers/Module'
-import Stage from '../containers/Stage'
-import Home from '../containers/Home'
+import AppLogin from '@/components/AppLogin'
+import CreateLink from '@/components/CreateLink'
+import Sandbox from '@/containers/Sandbox'
+import ModuleList from '@/containers/ModuleList'
+import Module from '@/containers/Module'
+import Stage from '@/containers/Stage'
+import Home from '@/containers/Home'
+import Login from '@/containers/Login'
 
 Vue.use(Router)
 
@@ -22,6 +22,10 @@ export default new Router({
       }
     },
     {
+      path: '/login',
+      component: Login
+    },
+    {
       path: '/create',
       component: CreateLink
     },
@@ -30,19 +34,12 @@ export default new Router({
       component: AppLogin
     },
     {
-      path: '/new/:page',
-      component: LinkList,
-      meta: {
-        title: 'Home'
-      }
+      path: '/sandbox',
+      component: Sandbox
     },
     {
       path: '/home',
       component: Home
-    },
-    {
-      path: '/top',
-      component: LinkList
     },
     {
       path: '/modules',

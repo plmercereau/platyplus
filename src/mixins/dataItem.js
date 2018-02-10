@@ -11,7 +11,7 @@ export const dataItemMixin = {
       loading: 0,
       config: [],
       formData: [],
-      edit: this.create // edit mode: turns on/off the forms inputs // TODO move to form level?
+      edit: this.create // edit mode: turns on/off the forms inputs
     }
   },
   methods: {
@@ -26,20 +26,21 @@ export const dataItemMixin = {
     reset (itemName) { // Resets the form to the value of the initial value of the item
       let itName = getItemName(this, itemName)
       this.$refs[this.config[itName].formRefName].reset()
-      this.$set(this.formData, this.config[itName].formDataName, dataToForm(this.config[itName].upsertMutation, this[itName]))
+      this.$set(this.formData, this.config[itName].formDataName, dataToForm(this[itName], this.config[itName]))
     },
     upsertForm (itemName) {
       let itName = getItemName(this, itemName)
       this.$validator.validateAll().then((result) => {
         if (result) {
-          this.upsertMutation(this.config[itName], this.formData[this.config[itName].formDataName]).then((res) => {
-            this[itemName] = firstAttribute(res.data, 2)
-            this.$set(this.formData, this.config[itName].formDataName, dataToForm(this.config[itName].upsertMutation, this[itName]))
-            if (this.$router.currentRoute.path.indexOf('create') > -1) { // TODO tricky as we can't guess for which item create param is for
+          this[itName] = formToData(this.formData[itName], this.config[itName], true) // Optimistic rendering
+          this.upsertMutation(this.formData[this.config[itName].formDataName], this.config[itName]).then((res) => {
+            this[itName] = firstAttribute(res.data, 2)
+            this.$set(this.formData, this.config[itName].formDataName, dataToForm(this[itName], this.config[itName]))
+            if (this.formData[itName].id) {
               this.$router.replace({path: this.$router.currentRoute.path.replace('create', this[itName].id)})
             }
           }).catch(() => {
-            console.log('error in the upsert')
+            // console.log('error in the upsert')
           })
           this.edit = false
         }
@@ -53,7 +54,7 @@ export const dataItemMixin = {
         if (immediate || this.config[itName].intervalCount > 0) {
           this.$apollo.queries[itName].refetch().then((res) => {
             this[itName] = Object.assign({}, this[itName], res.data[itName])
-            if (this.config[itName].upsertMutation) this.$set(this.formData, this.config[itName].formDataName, dataToForm(this.config[itName].upsertMutation, this[itName]))
+            if (this.config[itName].upsertMutation) this.$set(this.formData, this.config[itName].formDataName, dataToForm(this[itName], this.config[itName]))
             stopInterval(this, itName)
             this.$set(this.config[itName], 'serverError', false)
           })
@@ -101,7 +102,7 @@ export function itemManager (config) {
       update (data) {
         let item = firstAttribute(data)
         if (fullConfig.upsertMutation) {
-          this.$set(this.formData, fullConfig.formDataName, dataToForm(fullConfig.upsertMutation, item))
+          this.$set(this.formData, fullConfig.formDataName, dataToForm(item, fullConfig))
         }
         return item
       },
@@ -118,14 +119,14 @@ export function itemManager (config) {
                 }
               })
             }
-            this.$set(this.formData, fullConfig.formDataName, dataToForm(fullConfig.upsertMutation, this[itemName]))
+            this.$set(this.formData, fullConfig.formDataName, dataToForm(this[itemName], fullConfig))
           }
         }
         return fullConfig.create || !_.has(this.$route.params, fullConfig.paramKey) // TODO create as a router param as well?
       },
       error (error) {
         if (error.networkError) {
-          console.log('networkerror, starting refetch...') // TODO remove
+          // console.log('networkerror, starting refetch...')
           startInterval(this, this.refetch, itemName)
         } else console.log(`Error of type ${error.name}`)
       }
@@ -141,7 +142,7 @@ function getItemName (vm, data) {
   return _.isString(data) ? data : firstEditable
 }
 
-function dataToForm (upsertMutation, data) {
+function dataToForm (data, {upsertMutation}) {
   try {
     return upsertMutation.definitions[0].variableDefinitions
       .map((definition) => {
@@ -160,10 +161,21 @@ function dataToForm (upsertMutation, data) {
         return node
       }, {})
   } catch (e) {
-    console.log('Error in dataToForm')
+    // console.log('Error in dataToForm')
     if (!upsertMutation) console.log('No upsertForm mutation has been defined in the configuration')
     return _.clone(data)
   }
+}
+
+export function formToData (formData, {singleQuery, itemName}, optimistic = false) {
+  let res = schemaToObject(singleQuery)
+  // TODO complete with __typename etc.
+  Object.keys(formData).map((attr) => {
+    res[attr] = formData[attr]
+  })
+  res['optimistic'] = optimistic
+  res['__typename'] = `${_.upperFirst(itemName)}Node` // TODO crafty
+  return res
 }
 
 function schemaToObject (schema, selections) {
