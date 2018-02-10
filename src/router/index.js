@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import AppLogin from '@/components/AppLogin'
 import CreateLink from '@/components/CreateLink'
 import Sandbox from '@/containers/Sandbox'
 import ModuleList from '@/containers/ModuleList'
@@ -28,10 +27,6 @@ export default new Router({
     {
       path: '/create',
       component: CreateLink
-    },
-    {
-      path: '/login',
-      component: AppLogin
     },
     {
       path: '/sandbox',
