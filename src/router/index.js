@@ -15,14 +15,14 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect: '/home',
-      meta: {
-        title: 'Home'
-      }
+      redirect: '/home'
     },
     {
       path: '/login',
-      component: Login
+      component: Login,
+      meta: {
+        title: 'Login'
+      }
     },
     {
       path: '/create',
@@ -30,11 +30,17 @@ export default new Router({
     },
     {
       path: '/sandbox',
-      component: Sandbox
+      component: Sandbox,
+      meta: {
+        title: 'Sandbox'
+      }
     },
     {
       path: '/home',
-      component: Home
+      component: Home,
+      meta: {
+        title: 'Home'
+      }
     },
     {
       path: '/modules',

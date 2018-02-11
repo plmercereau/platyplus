@@ -193,6 +193,15 @@ export const SIGNIN_USER_MUTATION = gql`
   }
 `
 
+export const ME_QUERY = gql`  
+  query {
+    me {
+      id
+      username
+    }
+  }
+`
+
 export const TYPE_INTROSPECTION = gql`
   query TypeInstrospection($name: String!){
   __type(name: $name) {

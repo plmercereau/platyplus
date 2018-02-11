@@ -27,6 +27,14 @@ const GraphQLHelper = {
 
     setInterval(Vue.processQueue, QUEUE_SCHEDULE)
 
+    Vue.mixin({
+      computed: {
+        userId () {
+          return this.$root.$data.gqlUserId
+        }
+      }
+    })
+
     Vue.prototype.upsertMutation = async (formData, {collectionQuery, upsertMutation, itemName}) => {
       return apolloClient.mutate({
         mutation: upsertMutation,

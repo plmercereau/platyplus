@@ -16,7 +16,7 @@ import GraphQLHelper from './plugins/graphql-helper'
 import apolloClient from './plugins/apollo-client'
 
 Vue.config.productionTip = false
-const userId = localStorage.getItem(USER_ID)
+const gqlUserId = localStorage.getItem(USER_ID)
 
 Vue.use(Meta) // TODO still being used?
 
@@ -68,7 +68,7 @@ window.vm = new Vue({
   apolloProvider,
   router,
   data: {
-    userId
+    gqlUserId
   },
   template: '<App/>',
   components: { App }

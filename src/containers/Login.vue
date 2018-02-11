@@ -1,8 +1,8 @@
 <template lang="pug">
   div
     h1 Login
-    v-text-field(label="Username", v-model="username", required)
-    v-text-field(label="Username", v-model="password", required, type="password")
+    v-text-field(id="login-imput", label="Username", v-model="username", required)
+    v-text-field(id="login-password", label="Password", v-model="password", required, type="password")
     v-btn(@click="login") Login
 
     div {{ loginError }}
@@ -21,8 +21,7 @@
       }
     },
     methods: {
-      login () {
-        console.log('login')
+      login () { // TODO move to plugin/mixin
         this.$apollo.mutate({
           mutation: SIGNIN_USER_MUTATION,
           variables: {
@@ -30,10 +29,9 @@
             password: this.password
           }
         }).then(({data}) => {
-          console.log('Logged in!!!')
           localStorage.setItem(AUTH_TOKEN, data.login.token)
           localStorage.setItem(USER_ID, data.login.user.id)
-          this.$root.$data.userId = localStorage.getItem(USER_ID)
+          this.$root.$data.gqlUserId = localStorage.getItem(USER_ID)
           this.$router.push({path: '/'})
         }).catch((e) => {
           this.loginError = e

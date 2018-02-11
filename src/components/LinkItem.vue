@@ -25,9 +25,6 @@
       }
     },
     computed: {
-      userId () {
-        return this.$root.$data.userId
-      },
       linkNumber () {
         if (this.$route.path.includes('new')) {
           return (this.pageNumber - 1) * this.linksPerPage + (this.index + 1)

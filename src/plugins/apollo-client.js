@@ -13,14 +13,16 @@ const httpLink = new HttpLink({
   }
 })
 
-const token = localStorage.getItem(AUTH_TOKEN) || null
 const authMiddleware = new ApolloLink((operation, forward) => {
   // add the authorization to the headers
-  operation.setContext({
-    headers: {
-      authorization: `JWT ${token}`
-    }
-  })
+  const token = localStorage.getItem(AUTH_TOKEN) || null
+  if (token) {
+    operation.setContext({
+      headers: {
+        authorization: `JWT ${token}`
+      }
+    })
+  }
   return forward(operation)
 })
 
