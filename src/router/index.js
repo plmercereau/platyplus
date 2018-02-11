@@ -1,7 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import { createSandbox } from 'vue-kindergarten'
 
-import CreateLink from '@/components/CreateLink'
+import child from '../child'
+import RouteGoverness from './route-governess'
+import userPerimeter from '../perimeters/user-perimeter'
+
 import Sandbox from '@/containers/Sandbox'
 import ModuleList from '@/containers/ModuleList'
 import Module from '@/containers/Module'
@@ -11,7 +15,7 @@ import Login from '@/containers/Login'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/',
@@ -23,10 +27,6 @@ export default new Router({
       meta: {
         title: 'Login'
       }
-    },
-    {
-      path: '/create',
-      component: CreateLink
     },
     {
       path: '/sandbox',
@@ -46,7 +46,8 @@ export default new Router({
       path: '/modules',
       component: ModuleList,
       meta: {
-        title: 'Modules'
+        title: 'Modules',
+        perimeter: userPerimeter
       }
     },
     {
@@ -82,3 +83,24 @@ export default new Router({
   ],
   mode: 'history'
 })
+
+router.beforeEach((to, from, next) => {
+  to.matched.forEach((routeRecord) => {
+    const perimeter = routeRecord.meta.perimeter
+    const Governess = routeRecord.meta.governess || RouteGoverness
+    const action = routeRecord.meta.perimeterAction || 'route'
+
+    if (perimeter) {
+      const sandbox = createSandbox(child(), {
+        governess: new Governess(),
+        perimeters: [
+          perimeter
+        ]
+      })
+      return sandbox.guard(action, { to, from, next })
+    }
+    return next()
+  })
+})
+
+export default router

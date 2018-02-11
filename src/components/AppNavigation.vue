@@ -1,13 +1,13 @@
 <template lang="pug">
   v-navigation-drawer(clipped fixed v-model="$store.state.drawer" app)
     v-list(dense)
-      v-list-tile(v-if="!userId", to="/login")
+      v-list-tile(v-if="!user.id", to="/login")
         v-list-tile-action
           v-icon input
         v-list-tile-content
           v-list-tile-title Login
       v-divider
-      v-list-tile(v-if="userId", v-on:click="logout()")
+      v-list-tile(v-if="user.id", v-on:click="logout()")
         v-list-tile-action
           v-icon exit_to_app
         v-list-tile-content
@@ -33,17 +33,7 @@
 </template>
 
 <script>
-  import { USER_ID, AUTH_TOKEN } from '../constants/settings'
   export default {
-    name: 'AppNavigation',
-    methods: {
-      logout () { // TODO move to plugin/mixin
-        localStorage.removeItem(USER_ID)
-        localStorage.removeItem(AUTH_TOKEN)
-        this.$root.$data.gqlUserId = localStorage.getItem(USER_ID)
-        this.$apollo.getClient().resetStore() // TODO https://github.com/apollographql/apollo-client/issues/2774
-        this.$router.push({path: '/'})
-      }
-    }
+    name: 'AppNavigation'
   }
 </script>

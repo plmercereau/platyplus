@@ -3,7 +3,7 @@
     v-toolbar-side-icon(@click.stop="$store.commit('toggleDrawer')")
     v-toolbar-title Application name
     v-spacer
-    div(v-if="userId") {{me.username}}
+    div(v-if="user.id") {{user.username}}
     div(v-if="$store.state.graphqlModule.onlineServer") Online
     div(v-if="!$store.state.graphqlModule.onlineServer") Offline
     v-btn(icon)
@@ -17,19 +17,7 @@
 </template>
 
 <script>
-  import {ME_QUERY} from '../constants/graphql'
   export default {
-    name: 'AppToolBar',
-    data () {
-      return {
-        me: []
-      }
-    },
-    apollo: {
-      me: {
-        query: ME_QUERY,
-        skip () { return !this.userId }
-      }
-    }
+    name: 'AppToolBar'
   }
 </script>

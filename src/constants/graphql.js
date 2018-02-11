@@ -179,6 +179,16 @@ export const ALL_LINKS_SEARCH_QUERY = gql`
   }
 `
 
+export const coreUserFragment = gql`
+  fragment coreUserFragment on UserNode {
+    id
+    __typename
+    username
+    isStaff
+    isSuperuser
+  }
+`
+
 export const SIGNIN_USER_MUTATION = gql`
   mutation SigninUserMutation($username: String!, $password: String!) {
     login(
@@ -187,19 +197,20 @@ export const SIGNIN_USER_MUTATION = gql`
     ) {
       token
       user {
-        id
+        ...coreUserFragment
       }
     }
   }
+  ${coreUserFragment}
 `
 
 export const ME_QUERY = gql`  
   query {
     me {
-      id
-      username
+      ...coreUserFragment
     }
   }
+  ${coreUserFragment}
 `
 
 export const TYPE_INTROSPECTION = gql`
