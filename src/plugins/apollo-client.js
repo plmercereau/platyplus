@@ -7,7 +7,7 @@ import {HttpLink} from 'apollo-link-http/lib/index'
 import ApolloClient from 'apollo-client/index'
 
 const httpLink = new HttpLink({
-  uri: 'http://localhost:8000/graphql/',
+  uri: process.env.GRAPHQL_API || 'http://localhost:8000/graphql/',
   options: {
     mode: 'no-cors'
   }
