@@ -1,17 +1,19 @@
 {
-  "name": "vue-pwa",
-  "version": "1.0.0",
+  "name": "platyplus",
+  "version": "0.1.0",
   "description": "A Vue.js project",
-  "author": "Pilou",
+  "author": "Pierre-Louis Mercereau",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
-    "start": "node build/dev-server.js",
+    "start": "node server.js",
+    "start:dev": "node build/dev-server.js",
     "build": "node build/build.js",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
-    "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
+    "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
+    "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build"
   },
   "dependencies": {
     "apollo-cache-inmemory": "^1.1.5",
