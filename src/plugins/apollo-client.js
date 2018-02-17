@@ -6,6 +6,7 @@ import {getMainDefinition} from 'apollo-utilities/lib/index'
 import {HttpLink} from 'apollo-link-http/lib/index'
 import ApolloClient from 'apollo-client/index'
 
+console.log(process.env)
 const httpLink = new HttpLink({
   uri: process.env.GRAPHQL_API || 'http://localhost:8000/graphql/',
   options: {
