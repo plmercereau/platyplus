@@ -5,7 +5,7 @@ import {InMemoryCache} from 'apollo-cache-inmemory/lib/index'
 import {getMainDefinition} from 'apollo-utilities/lib/index'
 import {HttpLink} from 'apollo-link-http/lib/index'
 import ApolloClient from 'apollo-client/index'
-import fetch from 'unfetch'
+// import fetch from 'unfetch'
 import { onError } from 'apollo-link-error'
 import router from '../router'
 import * as types from '../store/mutation-types'
@@ -13,7 +13,7 @@ import store from '../store'
 
 const httpLink = new HttpLink({
   uri: process.env.GRAPHQL_API || 'http://localhost:8000/graphql/',
-  fetch: fetch, // TODO test without this
+  // fetch: fetch, // TODO test without this
   options: {
     mode: 'no-cors'
   }
