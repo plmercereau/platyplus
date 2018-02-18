@@ -14,7 +14,7 @@
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
     "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build",
-    "codecov": "cat test/coverage/*/lcov.info | ./node_modules/.bin/codecov"
+    "codecov": "cat test/unit/coverage/lcov.info | ./node_modules/.bin/codecov"
   },
   "dependencies": {
     "apollo-cache-inmemory": "^1.1.9",
