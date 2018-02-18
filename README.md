@@ -1,5 +1,5 @@
-# vue-pwa
-
+# PlatyPlus
+[![Build Status](https://travis-ci.org/plmercereau/platyplus.svg?branch=master)](https://travis-ci.org/plmercereau/platyplus)
 > A Vue.js project
 
 ## Build Setup
