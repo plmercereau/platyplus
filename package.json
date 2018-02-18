@@ -13,7 +13,8 @@
     "e2e": "BABEL_ENV=test node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
-    "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build"
+    "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build",
+    "report-coverage": "codecov"
   },
   "dependencies": {
     "apollo-cache-inmemory": "^1.1.9",

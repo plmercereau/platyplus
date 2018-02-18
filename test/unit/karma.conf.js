@@ -21,7 +21,9 @@ module.exports = function(config) {
       dir: './coverage',
       reporters: [
         { type: 'lcov', subdir: '.' },
-        { type: 'text-summary' }
+        { type: 'text-summary' },
+        { type: 'json', subdir: '.'},
+        { type: 'lcovonly', subdir: '.'}
       ]
     },
     failOnEmptyTestSuite: false
