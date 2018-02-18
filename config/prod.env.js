@@ -1,6 +1,6 @@
 'use strict'
 
-const graphql_api = process.env.GRAPHQL_API
+const graphql_api = JSON.stringify(process.env.GRAPHQL_API)
 
 module.exports = {
   NODE_ENV: '"production"',
