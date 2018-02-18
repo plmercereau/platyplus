@@ -5,9 +5,15 @@ import {InMemoryCache} from 'apollo-cache-inmemory/lib/index'
 import {getMainDefinition} from 'apollo-utilities/lib/index'
 import {HttpLink} from 'apollo-link-http/lib/index'
 import ApolloClient from 'apollo-client/index'
+import fetch from 'unfetch'
+import { onError } from 'apollo-link-error'
+import router from '../router'
+import * as types from '../store/mutation-types'
+import store from '../store'
 
 const httpLink = new HttpLink({
   uri: process.env.GRAPHQL_API || 'http://localhost:8000/graphql/',
+  fetch: fetch, // TODO test without this
   options: {
     mode: 'no-cors'
   }
@@ -24,6 +30,15 @@ const authMiddleware = new ApolloLink((operation, forward) => {
     })
   }
   return forward(operation)
+})
+
+const errorLink = onError((error) => {
+  if (error.networkError.statusCode === 401) {
+    console.log('Error 401')
+    localStorage.removeItem(AUTH_TOKEN)
+    store.commit(types.CLEAR_USER)
+    router.replace('/login')
+  }
 })
 
 // Set up subscription
@@ -46,9 +61,10 @@ const link = split(
   wsLink,
   httpLink
 )
+const uriLinks = errorLink.concat(link)
 
 const apolloClient = new ApolloClient({
-  link: concat(authMiddleware, link),
+  link: concat(authMiddleware, uriLinks),
   cache: new InMemoryCache({
     // dataIdFromObject: o => o.uuid // TODO check what is means
   })

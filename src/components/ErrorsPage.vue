@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    Some serverErrors occurred in loading the page.
+    <h1>Some serverErrors occurred in loading the page.</h1>
     <v-btn @click="refetch">Try again</v-btn>
   </v-container>
 </template>

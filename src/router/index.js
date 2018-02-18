@@ -1,10 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import { createSandbox } from 'vue-kindergarten'
-
-import child from '../child'
-import RouteGoverness from './route-governess'
-import userPerimeter from '../perimeters/user-perimeter'
 
 import Sandbox from '@/containers/Sandbox'
 import ModuleList from '@/containers/ModuleList'
@@ -46,8 +41,7 @@ const router = new Router({
       path: '/modules',
       component: ModuleList,
       meta: {
-        title: 'Modules',
-        perimeter: userPerimeter
+        title: 'Modules'
       }
     },
     {
@@ -84,23 +78,8 @@ const router = new Router({
   mode: 'history'
 })
 
-router.beforeEach((to, from, next) => {
-  to.matched.forEach((routeRecord) => {
-    const perimeter = routeRecord.meta.perimeter
-    const Governess = routeRecord.meta.governess || RouteGoverness
-    const action = routeRecord.meta.perimeterAction || 'route'
-
-    if (perimeter) {
-      const sandbox = createSandbox(child(), {
-        governess: new Governess(),
-        perimeters: [
-          perimeter
-        ]
-      })
-      return sandbox.guard(action, { to, from, next })
-    }
-    return next()
-  })
-})
+// router.beforeEach((to, from, next) => {
+//   return next()
+// })
 
 export default router
