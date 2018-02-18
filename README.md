@@ -1,5 +1,6 @@
 # PlatyPlus
 [![Build Status](https://travis-ci.org/plmercereau/platyplus.svg?branch=master)](https://travis-ci.org/plmercereau/platyplus)
+[![codecov](https://codecov.io/gh/plmercereau/platyplus/branch/master/graph/badge.svg)](https://codecov.io/gh/plmercereau/platyplus)
 > A Vue.js project
 
 ## Build Setup
