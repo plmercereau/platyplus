@@ -14,7 +14,7 @@
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
     "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build",
-    "report-coverage": "codecov"
+    "codecov": "cat test/coverage/*/lcov.info | ./node_modules/.bin/codecov"
   },
   "dependencies": {
     "apollo-cache-inmemory": "^1.1.9",
@@ -49,6 +49,8 @@
     "chai": "^4.1.2",
     "chalk": "^2.3.1",
     "chromedriver": "^2.35.0",
+    "codecov": "^3.0.0",
+    "codecov.io": "^0.1.6",
     "connect-history-api-fallback": "^1.4.0",
     "copy-webpack-plugin": "^4.4.1",
     "cross-env": "^5.0.5",
