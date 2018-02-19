@@ -26,6 +26,7 @@ Vue.use(GraphQLHelper)
 
 Vue.use(AuthPlugin)
 
+/** Creates an Apollo Provider with a global error hanlder that is actually not used */
 const apolloProvider = new VueApollo({
   defaultClient: apolloClient,
   defaultOptions: {

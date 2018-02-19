@@ -14,7 +14,9 @@
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
     "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build",
-    "codecov": "cat test/unit/coverage/lcov.info | ./node_modules/.bin/codecov"
+    "codecov": "cat test/unit/coverage/lcov.info | ./node_modules/.bin/codecov",
+    "docsify:dev": "docsify serve docs",
+    "build:doc": "node build/api-doc.js"
   },
   "dependencies": {
     "apollo-cache-inmemory": "^1.1.9",
@@ -50,12 +52,13 @@
     "chalk": "^2.3.1",
     "chromedriver": "^2.35.0",
     "codecov": "^3.0.0",
-    "connect-history-api-fallback": "^1.4.0",
+    "connect-history-api-fallback": "^1.5.0",
     "copy-webpack-plugin": "^4.4.1",
     "cross-env": "^5.0.5",
     "cross-spawn": "^6.0.4",
     "css-loader": "^0.28.9",
     "cssnano": "^3.10.0",
+    "docsify": "^4.6.3",
     "eslint": "^4.18.0",
     "eslint-config-standard": "^11.0.0-beta.0",
     "eslint-friendly-formatter": "^3.0.0",
@@ -73,6 +76,7 @@
     "html-webpack-plugin": "^2.30.1",
     "http-proxy-middleware": "^0.17.4",
     "inject-loader": "^3.0.1",
+    "jsdoc-to-markdown": "^4.0.1",
     "karma": "^2.0.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.1",

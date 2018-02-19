@@ -1,15 +1,16 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import Sandbox from '@/containers/Sandbox'
-import ModuleList from '@/containers/ModuleList'
-import Module from '@/containers/Module'
-import Stage from '@/containers/Stage'
-import Home from '@/containers/Home'
-import Login from '@/containers/Login'
+import Sandbox from '../containers/Sandbox'
+import ModuleList from '../containers/ModuleList'
+import Module from '../containers/Module'
+import Stage from '../containers/Stage'
+import Home from '../containers/Home'
+import Login from '../containers/Login'
 
 Vue.use(Router)
 
+/** Definition of the routes of the application */
 const router = new Router({
   routes: [
     {
