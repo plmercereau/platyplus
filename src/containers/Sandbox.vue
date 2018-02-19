@@ -1,7 +1,7 @@
 <template lang="pug">
   div
     h1 Sandbox
-    div {{ bidip }}
+    div {{ $can('update', {type:'module', username:'pilou'}) }}
 </template>
 
 <script>

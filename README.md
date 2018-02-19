@@ -10,6 +10,7 @@
 [![Inline docs](http://inch-ci.org/github/plmercereau/platyplus.svg?branch=master)](http://inch-ci.org/github/plmercereau/platyplus)
 [![HitCount](http://hits.dwyl.io/plmercereau/platyplus.svg)](http://hits.dwyl.io/plmercereau/platyplus)
 > A Vue.js project
+Documentation available [](https://plmercereau.github.io/platyplus)
 ## Build Setup
 
 ``` bash

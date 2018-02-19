@@ -67,7 +67,8 @@ const apolloClient = new ApolloClient({
   link: concat(authMiddleware, uriLinks),
   cache: new InMemoryCache({
     // dataIdFromObject: o => o.uuid // TODO check what is means
-  })
+  }),
+  connectToDevTools: true
 })
 
 export default apolloClient
