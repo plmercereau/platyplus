@@ -5,8 +5,8 @@
     v-content
       v-container(fluid style="min-height: 0;" grid-list-lg)
         transition(name="fade" mode="out-in")
-          keep-alive
-            router-view
+          //keep-alive
+          router-view
     v-footer(app fixed)
       span &copy; 2018
 </template>

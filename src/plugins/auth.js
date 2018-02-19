@@ -4,10 +4,11 @@ import store from '../store'
 import apolloClient from '../plugins/apollo-client'
 import {AUTH_TOKEN} from '../constants/settings'
 import {ME_QUERY, SIGNIN_USER_MUTATION} from '../constants/graphql'
+import defineAbilitiesFor from '../constants/ability'
 
 const AuthPlugin = {
   install (Vue) {
-    if (localStorage.getItem(AUTH_TOKEN)) {
+    if (localStorage.getItem(AUTH_TOKEN)) { // TODO DRY as it is used elsewhere
       apolloClient.query({query: ME_QUERY}).then((res) => {
         store.commit(types.SET_USER, res.data.me)
       })
@@ -20,6 +21,13 @@ const AuthPlugin = {
         }
       }
     })
+
+    // if keep-alive: does not reload even when page is in cache
+    // TODO subobtimal as call too often and not kept in memory...
+    Vue.prototype.$can = function (action, subject) {
+      let ability = defineAbilitiesFor(store.state.auth.user)
+      return ability.can(action, subject)
+    }
 
     Vue.prototype.login = (username, password) => {
       apolloClient.mutate({

@@ -55,7 +55,8 @@ window.vm = new Vue({
   // fragments,
   el: '#app',
   store, // Vuex
-  apolloProvider,
+  // apolloProvider,
+  provide: apolloProvider.provide(),
   router,
   template: '<App/>',
   components: { App }
