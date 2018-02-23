@@ -82,11 +82,12 @@
     data () {
       return {
         tabs: ['General', 'Stages', 'Deployments'],
-        currentTab: 'General'
+        currentTab: 'General',
+        module: {}
       }
     },
     apollo: {
-      ...itemManager(moduleConfig)
+      module: itemManager(moduleConfig)
     }
   }
 </script>

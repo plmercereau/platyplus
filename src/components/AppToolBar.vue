@@ -1,6 +1,6 @@
 <template lang="pug">
   v-toolbar(app fixed clipped-left)
-    v-toolbar-side-icon(@click.stop="$store.commit('toggleDrawer')")
+    v-toolbar-side-icon(@click.stop="toggleDrawer()")
     v-toolbar-title Application name
     v-spacer
     div(v-if="user.id") {{user.username}}
@@ -17,7 +17,14 @@
 </template>
 
 <script>
+  import * as types from '../store/mutation-types'
+
   export default {
-    name: 'AppToolBar'
+    name: 'AppToolBar',
+    methods: {
+      toggleDrawer () {
+        this.$store.commit(types.TOGGLE_DRAWER)
+      }
+    }
   }
 </script>

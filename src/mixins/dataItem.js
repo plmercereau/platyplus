@@ -84,9 +84,8 @@ export const dataItemMixin = {
 }
 
 export function itemManager (config) {
-  let res = {}
   let itemName = config.itemName || config.singleQuery.definitions[0].selectionSet.selections[0].name.value
-  res[itemName] = function () {
+  return function () {
     let fullConfig = _.clone(config)
     fullConfig.itemName = config.itemName || config.singleQuery.definitions[0].selectionSet.selections[0].name.value
     fullConfig.formDataName = config.formDataName || fullConfig.itemName
@@ -109,6 +108,7 @@ export function itemManager (config) {
       skip () {
         if (!_.has(this.config, itemName)) {
           this[itemName] = Object.assign({}, this[itemName], schemaToObject(fullConfig.singleQuery))
+          this.$set(this[itemName], '__typename', `${_.upperFirst(itemName)}Node`)
           fullConfig.create = !_.has(this.$route.params, fullConfig.paramKey)
           this.$set(this.config, itemName, fullConfig)
           if (fullConfig.upsertMutation) {
@@ -132,7 +132,6 @@ export function itemManager (config) {
       }
     }
   }
-  return res
 }
 
 function getItemName (vm, data) {

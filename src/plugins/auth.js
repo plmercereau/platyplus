@@ -44,6 +44,7 @@ const AuthPlugin = {
     Vue.prototype.logout = () => {
       localStorage.removeItem(AUTH_TOKEN)
       store.commit(types.CLEAR_USER)
+      store.commit(types.HIDE_DRAWER)
       apolloClient.resetStore() // TODO https://github.com/apollographql/apollo-client/issues/2774
       router.push({path: '/'})
     }
