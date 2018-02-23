@@ -75,12 +75,14 @@
     data () {
       return {
         tabs: ['General', 'Next Stages', 'Observation Forms'], // TODO set the tab as a param sent through the router?
-        currentTab: 'General'
+        currentTab: 'General',
+        stage: {},
+        module: {}
       }
     },
     apollo: {
-      ...itemManager(stageConfig),
-      ...itemManager(moduleConfig)
+      stage: itemManager(stageConfig),
+      module: itemManager(moduleConfig)
     }
   }
 </script>

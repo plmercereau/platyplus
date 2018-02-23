@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-// import * as actions from './actions'
 import graphqlModule from './modules/graphql'
 import auth from './modules/auth'
+import * as types from './mutation-types'
 
 Vue.use(Vuex)
 
@@ -16,8 +16,11 @@ const store = new Vuex.Store({
     drawer: undefined
   },
   mutations: {
-    toggleDrawer (state) {
+    [types.TOGGLE_DRAWER] (state) {
       state.drawer = !state.drawer
+    },
+    [types.HIDE_DRAWER] (state) {
+      state.drawer = false
     }
   }
 })

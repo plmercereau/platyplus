@@ -45,6 +45,11 @@ export const extendedStageFragment = gql`
     module {
       id
       __typename
+      ownedBy {
+        id
+        __typename
+        username
+      }
     }
     nextStages {
       edges {

@@ -10,7 +10,7 @@
         </div>
       </v-card-title>
       <v-card-actions>
-        <v-btn v-if="$can('read','module')" flat color="orange" :to="'/modules/' + module.id">Explore</v-btn>
+        <v-btn v-if="$can('read',module)" flat color="orange" :to="'/modules/' + module.id">Explore</v-btn>
         <v-btn flat color="orange">Deploy</v-btn>
       </v-card-actions>
     </v-card>
