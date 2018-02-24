@@ -13,6 +13,9 @@ before_script:
 - sh -e /etc/init.d/xvfb start
 after_script:
 - npm run codecov
-deploy:
+deploy: #https://docs.travis-ci.com/user/deployment/heroku/
+  provider: heroku
+  app:
+    dev: platyplus-dev
   api_key:
     secure: iNstuKEL/hPH2D/WqohBBptZVn3Se6KKXy8HZvge/n8BTsOhMVfd8DXlvWid0YOjS+exIXO4kvSY2OmvhlrRmycWGOWQhy0SE8gmeFvhzvsrw4Es/Kp6ZHSNTLOfHtIk/0prxAWwzfEctduyu6VXnUfvnw9QPUTzBRuF64lahiY+SbcTpAv2EJ1rZTcFibf1/zdbPaO9LC48LYNSOJFAHV104xWIWVt7ExajjrzOsshEEqjy7cc4veTytq9wFC6BP1PG0XDHoFeicvdnCPibCPQoy9cxMfrLDBDdt9h7v31uuDEURvscduu00SgnCKOE+4fIHrs9oL3pw8ARKyQDwoWPti8DoyBJTbDULhPBKYaCIAlzWzJbgno6utHJz5ftna3BMdj/38iwvJ77TX9byPhDG1mP8CiuoOgkQ5ybflS8IzMoVsAlErUjh4lhEimQGE5G//BAOAxNppZ3PHn/p9SdYErXzAX55r8D1xk7qZXAUYeAJrNEgibaCPLbASBLOPV5ueTbNYtT2MisQAjtxDBk/ZA33tjJs5AbZEs1b9re5RPw7MRVt6/BgBXWPN5u62LcoGgedUT4Sfu97SVxbTxk62eaqHZIFsIo9WFtxBxCzxnu/4iegj8p73vZJbzJ/1+ASUGgoQFTrSa0aV6gSeQj1Q9MzY0jyyHAXTvrCi4=
