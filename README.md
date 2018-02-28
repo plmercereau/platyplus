@@ -9,8 +9,12 @@
 [![devDependencies Status](https://david-dm.org/plmercereau/platyplus/dev-status.svg)](https://david-dm.org/plmercereau/platyplus?type=dev)
 [![Inline docs](http://inch-ci.org/github/plmercereau/platyplus.svg?branch=master)](http://inch-ci.org/github/plmercereau/platyplus)
 [![HitCount](http://hits.dwyl.io/plmercereau/platyplus.svg)](http://hits.dwyl.io/plmercereau/platyplus)
-> A Vue.js project
-Documentation available [](https://plmercereau.github.io/platyplus)
+> [Documentation](https://plmercereau.github.io/platyplus) of the product
+## Development
+### Roadmap
+[Tentative roadmap](https://paper.dropbox.com/doc/PlatyPlus-Roadmap-mTRJ6dOTfLpErJeXROqOK?_tk=share_copylink)
+### Ongoing work
+[Kaban board](https://trello.com/b/fo2mZ68W/platyplus) of the project
 ## Build Setup
 
 ``` bash

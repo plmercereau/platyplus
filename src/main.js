@@ -5,6 +5,7 @@ import router from './router'
 import store from './store'
 import Meta from 'vue-meta'
 import Vuetify from 'vuetify'
+import VueMoment from 'vue-moment'
 import VeeValidate from 'vee-validate'
 import 'vuetify/dist/vuetify.min.css'
 // Component imports
@@ -49,6 +50,8 @@ Vue.use(Vuetify, {
     // warning: '#FFC107'
   }
 })
+
+Vue.use(VueMoment)
 
 /* eslint-disable no-new */
 window.vm = new Vue({

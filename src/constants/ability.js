@@ -12,7 +12,7 @@ export default function defineAbilitiesFor (user) {
     { subjectName },
     can => {
       if (user && user.username) {
-        can(['route'], ['module', 'sandbox'])
+        can(['route'], ['module', 'sandbox', 'sync-queue'])
         can(['logout'], 'auth')
         can(['create', 'read'], ['module', 'stage'])
         can(['read'], ['module', 'stage'])

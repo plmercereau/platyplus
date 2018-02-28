@@ -64,16 +64,12 @@
 </template>
 
 <script>
-  import {ALL_MODULES_QUERY, SINGLE_MODULE_QUERY, UPSERT_MODULE_MUTATION} from '../constants/graphql'
   import {dataItemMixin, itemManager} from '../mixins/dataItem'
   import LoadingPage from '../components/LoadingPage'
   import ErrorsPage from '../components/ErrorsPage'
+  import {DATA_ITEMS_CONFIG} from '../constants/settings'
 
-  const moduleConfig = {
-    upsertMutation: UPSERT_MODULE_MUTATION,
-    singleQuery: SINGLE_MODULE_QUERY,
-    collectionQuery: ALL_MODULES_QUERY
-  }
+  const moduleConfig = DATA_ITEMS_CONFIG.module
 
   export default {
     name: 'module',

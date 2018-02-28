@@ -25,6 +25,11 @@
         v-list-tile-content
           v-list-tile-title Modules
       v-divider
+      v-list-tile(v-if="$can('route','sync-queue')",to="/sync-queue")
+        v-list-tile-action
+          v-icon sync
+        v-list-tile-content
+          v-list-tile-title Synchronisation queue
       v-list-tile(v-if="$can('route','sandbox')",to="/sandbox")
         v-list-tile-action
           v-icon play_for_work

@@ -1,7 +1,7 @@
 <template lang="pug">
   v-toolbar(app fixed clipped-left)
     v-toolbar-side-icon(@click.stop="toggleDrawer()")
-    v-toolbar-title Application name
+    v-toolbar-title PlatyPlus
     v-spacer
     div(v-if="user.id") {{user.username}}
     div(v-if="$store.state.graphqlModule.onlineServer") Online

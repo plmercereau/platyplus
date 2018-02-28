@@ -2,7 +2,7 @@ import store from '../store'
 import apolloClient from '../plugins/apollo-client'
 import * as types from '../store/mutation-types'
 import _ from 'lodash'
-import {QUEUE_SCHEDULE} from '../constants/settings'
+import {DATA_ITEMS_CONFIG, QUEUE_SCHEDULE} from '../constants/settings'
 import {firstAttribute} from '../utils'
 
 const GraphQLHelper = {
@@ -13,7 +13,8 @@ const GraphQLHelper = {
         if (!store.state.graphqlModule.mutationsQueueLock && !_.isEmpty(queue)) {
           store.commit(types.LOCK_MUTATION_QUEUE)
           let cursor = queue[0]
-          Vue.prototype.upsertMutation(cursor.formData, cursor.config).then((res) => {
+          let config = DATA_ITEMS_CONFIG[cursor.itemName]
+          Vue.prototype.upsertMutation(cursor.formData, config).then((res) => {
             store.commit(types.SHIFT_MUTATION)
             store.commit(types.UNLOCK_MUTATION_QUEUE)
             store.commit(types.SET_SERVER_STATUS_ONLINE)
@@ -67,7 +68,7 @@ const GraphQLHelper = {
       }).then((res) => {
         return res
       }).catch((e) => { // upsertMutation failed
-        store.commit(types.PUSH_MUTATION, {formData, config: {collectionQuery, upsertMutation, itemName}})
+        store.commit(types.PUSH_MUTATION, {formData, itemName})
         store.commit(types.SET_SERVER_STATUS_OFFLINE)
         throw e.message
       })

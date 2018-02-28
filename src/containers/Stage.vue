@@ -53,20 +53,10 @@
 </template>
 
 <script>
-  import {SINGLE_MODULE_QUERY, SINGLE_STAGE_QUERY, UPSERT_STAGE_MUTATION} from '../constants/graphql'
   import {dataItemMixin, itemManager} from '../mixins/dataItem'
   import LoadingPage from '../components/LoadingPage'
   import ErrorsPage from '../components/ErrorsPage'
-
-  const stageConfig = {
-    singleQuery: SINGLE_STAGE_QUERY,
-    upsertMutation: UPSERT_STAGE_MUTATION,
-    formDataName: 'stage', // default value
-    formRefName: 'stageForm' // default value
-  }
-  const moduleConfig = {
-    singleQuery: SINGLE_MODULE_QUERY
-  }
+  import {DATA_ITEMS_CONFIG} from '../constants/settings'
 
   export default {
     name: 'stage',
@@ -81,8 +71,8 @@
       }
     },
     apollo: {
-      stage: itemManager(stageConfig),
-      module: itemManager(moduleConfig)
+      stage: itemManager(DATA_ITEMS_CONFIG.stage),
+      module: itemManager(DATA_ITEMS_CONFIG.module)
     }
   }
 </script>

@@ -18,14 +18,15 @@ const actions = {
 
 // mutations
 const mutations = {
-  [types.PUSH_MUTATION] (state, {formData, config}) {
-    const index = state.mutationsQueue.findIndex(({cFormData, cConfig}) => {
-      return ((config.itemName === cConfig.itemName) && (formData.id === cFormData.id))
+  [types.PUSH_MUTATION] (state, {itemName, formData}) {
+    const index = state.mutationsQueue.findIndex((cursor) => {
+      return ((itemName === cursor.itemName) && (formData.id === cursor.formData.id))
     })
     if (index > -1) { // the mutation in arg replaces the existing one
-      state.splice(index, 1, {formData, config})
+      let attempts = (state.mutationsQueue[index].attempts || 0) + 1
+      state.mutationsQueue.splice(index, 1, {itemName, attempts, lastAttempt: Date(), formData})
     } else {
-      state.mutationsQueue.push({formData, config})
+      state.mutationsQueue.push({itemName, attempts: 1, lastAttempt: Date(), formData})
     }
   },
   [types.SHIFT_MUTATION] (state, mutation) {

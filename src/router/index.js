@@ -4,6 +4,7 @@ import Router from 'vue-router'
 import defineAbilitiesFor from '../constants/ability'
 
 import Sandbox from '../containers/Sandbox'
+import SyncQueue from '../containers/SyncQueue'
 import ModuleList from '../containers/ModuleList'
 import Module from '../containers/Module'
 import Stage from '../containers/Stage'
@@ -39,6 +40,14 @@ const router = new Router({
       meta: {
         title: 'Sandbox',
         type: 'sandbox'
+      }
+    },
+    {
+      path: '/sync-queue',
+      component: SyncQueue,
+      meta: {
+        title: 'Synchronisation queue',
+        type: 'sync-queue'
       }
     },
     {
