@@ -5,8 +5,8 @@
     v-container(v-if="status === 'ok'" grid-list-md)
       v-breadcrumbs(large)
         v-icon(slot="divider") chevron_right
-        v-breadcrumbs-item(to="/modules") Modules
-        v-breadcrumbs-item(to="'/modules' + module.id") {{module.name || 'New'}}
+        v-breadcrumbs-item(to="/modules", exact) Modules
+        v-breadcrumbs-item {{module.name || 'New'}}
       v-btn(v-if="!edit && $can('edit', module)", @click="edit=!edit") Edit
       v-btn(v-if="edit && $can('edit', module)", @click="upsertForm") Save
       v-btn(v-if="edit && $can('edit', module)", @click="reset") Reset
@@ -64,10 +64,11 @@
 </template>
 
 <script>
-  import {dataItemMixin, itemManager} from '../mixins/dataItem'
+  import {dataItemMixin} from '../mixins/dataItem'
+  import {itemManager} from '../utils/graphql'
   import LoadingPage from '../components/LoadingPage'
   import ErrorsPage from '../components/ErrorsPage'
-  import {DATA_ITEMS_CONFIG} from '../constants/settings'
+  import {DATA_ITEMS_CONFIG} from '../config'
 
   const moduleConfig = DATA_ITEMS_CONFIG.module
 

@@ -1,20 +1,18 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import defineAbilitiesFor from '../constants/ability'
-
 import Sandbox from '../containers/Sandbox'
 import SyncQueue from '../containers/SyncQueue'
+import OrgUnit from '../containers/OrgUnit'
 import ModuleList from '../containers/ModuleList'
 import Module from '../containers/Module'
 import Stage from '../containers/Stage'
 import Home from '../containers/Home'
 import Login from '../containers/Login'
 import store from '../store'
-import {AUTH_TOKEN} from '../constants/settings'
 import * as types from '../store/mutation-types'
 import apolloClient from '../plugins/apollo-client'
-import {ME_QUERY} from '../constants/graphql'
+import {ME_QUERY, AUTH_TOKEN, defineAbilitiesFor} from '../config'
 
 Vue.use(Router)
 
@@ -56,6 +54,33 @@ const router = new Router({
       meta: {
         title: 'Home',
         type: 'home'
+      }
+    },
+    {
+      path: '/org-units',
+      component: OrgUnit,
+      meta: {
+        title: 'Organisational Units',
+        type: 'orgUnit'
+      }
+    },
+    {
+      path: '/org-units/create',
+      component: OrgUnit,
+      props: { create: true },
+      meta: {
+        title: 'Organisational Unit',
+        type: 'orgUnit',
+        action: 'create'
+      }
+    },
+    {
+      path: '/org-units/:orgUnitId',
+      component: OrgUnit,
+      meta: {
+        title: 'Organisational Unit',
+        type: 'orgUnit',
+        action: 'read'
       }
     },
     {

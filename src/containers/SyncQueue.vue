@@ -3,7 +3,7 @@
     h1 Synchronisation queue
     v-data-table(:headers="headers", :items="mutationsQueue", hide-actions)
       template(slot="no-data")
-        div Nothing to synchronise
+        i Queue is empty
       template(slot="items", slot-scope="props")
         td {{props.item.itemName}}
         td {{props.item.attempts}}

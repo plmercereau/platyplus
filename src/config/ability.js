@@ -7,16 +7,16 @@ function subjectName (item) {
   return item
 }
 
-export default function defineAbilitiesFor (user) {
+export default function (user) {
   return AbilityBuilder.define(
     { subjectName },
     can => {
       if (user && user.username) {
-        can(['route'], ['module', 'sandbox', 'sync-queue'])
+        can(['route'], ['module', 'orgUnit', 'sandbox', 'sync-queue'])
         can(['logout'], 'auth')
-        can(['create', 'read'], ['module', 'stage'])
-        can(['read'], ['module', 'stage'])
-        can(['edit'], ['module', 'stage'], {
+        can(['create', 'read'], ['module', 'stage', 'orgUnit'])
+        can(['read'], ['module', 'stage', 'orgUnit'])
+        can(['edit'], ['module', 'stage', 'orgUnit'], {
           id: null
         })
         can(['edit', 'create-child'], 'module', {

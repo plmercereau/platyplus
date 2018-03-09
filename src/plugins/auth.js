@@ -2,9 +2,7 @@ import * as types from '../store/mutation-types'
 import router from '../router'
 import store from '../store'
 import apolloClient from '../plugins/apollo-client'
-import {AUTH_TOKEN} from '../constants/settings'
-import {ME_QUERY, SIGNIN_USER_MUTATION} from '../constants/graphql'
-import defineAbilitiesFor from '../constants/ability'
+import {AUTH_TOKEN, ME_QUERY, SIGNIN_USER_MUTATION, defineAbilitiesFor} from '../config'
 
 const AuthPlugin = {
   install (Vue) {

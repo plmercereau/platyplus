@@ -19,6 +19,12 @@
         v-list-tile-content
           v-list-tile-title Home
       v-divider
+      v-list-tile(v-if="$can('route','orgUnit')", to="/org-units")
+        v-list-tile-action
+          v-icon contact_mail
+        v-list-tile-content
+          v-list-tile-title Org Units
+      v-divider
       v-list-tile(v-if="$can('route','module')", to="/modules")
         v-list-tile-action
           v-icon contact_mail

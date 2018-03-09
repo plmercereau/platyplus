@@ -5,10 +5,16 @@
     v-content
       v-container(fluid style="min-height: 0;" grid-list-lg)
         transition(name="fade" mode="out-in")
-          //keep-alive
-          router-view
+          keep-alive
+            router-view(:key="$route.fullPath")
     v-footer(app fixed)
-      span &copy; 2018
+      span &copy; 2018 -&nbsp;
+      span Icons made by&nbsp;
+        a(href="http://www.freepik.com" title="Freepik") Freepik
+        |  from&nbsp;
+        a(href="https://www.flaticon.com/" title="Flaticon") www.flaticon.com
+        |  is licensed by&nbsp;
+        a(href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank") CC 3.0 BY
 </template>
 
 <script>

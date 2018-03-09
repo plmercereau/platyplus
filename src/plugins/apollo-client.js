@@ -1,5 +1,5 @@
 import {WebSocketLink} from 'apollo-link-ws/lib/index'
-import {AUTH_TOKEN} from '../constants/settings'
+import {AUTH_TOKEN} from '../config'
 import {ApolloLink, concat, split} from 'apollo-link/lib/index'
 import {InMemoryCache} from 'apollo-cache-inmemory/lib/index'
 import {getMainDefinition} from 'apollo-utilities/lib/index'
@@ -65,6 +65,7 @@ const uriLinks = errorLink.concat(link)
 
 const apolloClient = new ApolloClient({
   link: concat(authMiddleware, uriLinks),
+  // addTypename: true,
   cache: new InMemoryCache({
     // dataIdFromObject: o => o.uuid // TODO check what is means
   }),
