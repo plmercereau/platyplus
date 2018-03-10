@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import localforage from 'localforage'
 
 import Sandbox from '../containers/Sandbox'
 import SyncQueue from '../containers/SyncQueue'
@@ -142,16 +143,18 @@ router.beforeEach((to, from, next) => { // TODO refactor: this is ugly
   // By default: if no permission is detailed for a path, then give action
   if (!to.meta.type) return next()
 
-  if (localStorage.getItem(AUTH_TOKEN) && store.state.auth.user.username === '') { // TODO DRY as used elsewhere
-    apolloClient.query({query: ME_QUERY}).then((res) => {
-      store.commit(types.SET_USER, res.data.me)
+  localforage.getItem(AUTH_TOKEN).then((token) => {
+    if (token && store.state.auth.user.username === '') { // TODO DRY as used elsewhere
+      apolloClient.query({query: ME_QUERY}).then((res) => {
+        store.commit(types.SET_USER, res.data.me)
+        let ability = defineAbilitiesFor(store.state.auth.user)
+        if (ability.can(to.meta.action || 'route', {type: to.meta.type})) return next()
+      }) // TODO catch errors
+    } else {
       let ability = defineAbilitiesFor(store.state.auth.user)
       if (ability.can(to.meta.action || 'route', {type: to.meta.type})) return next()
-    }) // TODO catch errors
-  } else {
-    let ability = defineAbilitiesFor(store.state.auth.user)
-    if (ability.can(to.meta.action || 'route', {type: to.meta.type})) return next()
-  }
+    }
+  })
 })
 
 export default router

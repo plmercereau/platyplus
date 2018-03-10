@@ -1,15 +1,17 @@
+import localforage from 'localforage'
 import {WebSocketLink} from 'apollo-link-ws/lib/index'
 import {AUTH_TOKEN} from '../config'
-import {ApolloLink, concat, split} from 'apollo-link/lib/index'
-import {InMemoryCache} from 'apollo-cache-inmemory/lib/index'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import { persistCache } from 'apollo-cache-persist'
 import {getMainDefinition} from 'apollo-utilities/lib/index'
 import {HttpLink} from 'apollo-link-http/lib/index'
 import ApolloClient from 'apollo-client/index'
-// import fetch from 'unfetch'
 import { onError } from 'apollo-link-error'
 import router from '../router'
 import * as types from '../store/mutation-types'
 import store from '../store'
+import {concat, split} from 'apollo-link'
+import { setContext } from 'apollo-link-context'
 
 const httpLink = new HttpLink({
   uri: process.env.GRAPHQL_API || 'http://localhost:8000/graphql/',
@@ -19,25 +21,24 @@ const httpLink = new HttpLink({
   }
 })
 
-const authMiddleware = new ApolloLink((operation, forward) => {
-  // add the authorization to the headers
-  const token = localStorage.getItem(AUTH_TOKEN) || null
-  if (token) {
-    operation.setContext({
+const authMiddleware = setContext(operation =>
+  localforage.getItem(AUTH_TOKEN).then(token => {
+    return {
       headers: {
-        authorization: `JWT ${token}`
+        authorization: token ? `JWT ${token}` : null
       }
-    })
-  }
-  return forward(operation)
-})
+    }
+  })
+)
 
 const errorLink = onError((error) => {
-  if (error.networkError.statusCode === 401) {
+  console.log(error)
+  if (error.networkError && error.networkError.statusCode === 401) {
     console.log('Error 401')
-    localStorage.removeItem(AUTH_TOKEN)
-    store.commit(types.CLEAR_USER)
-    router.replace('/login')
+    localforage.removeItem(AUTH_TOKEN).then(() => {
+      store.commit(types.CLEAR_USER)
+      router.replace('/login')
+    })
   }
 })
 
@@ -63,12 +64,19 @@ const link = split(
 )
 const uriLinks = errorLink.concat(link)
 
+const cache = new InMemoryCache({
+  // dataIdFromObject: o => o.uuid // TODO check what is means
+})
+
+persistCache({
+  cache,
+  storage: localforage
+})
+
 const apolloClient = new ApolloClient({
   link: concat(authMiddleware, uriLinks),
   // addTypename: true,
-  cache: new InMemoryCache({
-    // dataIdFromObject: o => o.uuid // TODO check what is means
-  }),
+  cache,
   connectToDevTools: true
 })
 
