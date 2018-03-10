@@ -3,7 +3,6 @@ import gql from 'graphql-tag'
 export const coreOrgUnitFragment = gql`
   fragment coreOrgUnitFragment on OrgUnitNode {
     id
-    __typename
     name
     shortDescription
   }
@@ -16,21 +15,18 @@ export const extendedOrgUnitFragment = gql`
       edges {
         node {
           id
-          __typename
           name
         }
       }
     }
     parent {
       id
-      __typename
       name
     }
     children {
       edges {
         node {
           id
-          __typename
           name
         }
       }

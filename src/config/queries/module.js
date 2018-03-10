@@ -4,7 +4,6 @@ import {coreStageFragment} from './stage'
 export const coreModuleFragment = gql`
   fragment coreModuleFragment on ModuleNode {
     id
-    __typename
     name
     shortDescription
   }
@@ -16,7 +15,6 @@ export const extendedModuleFragment = gql`
     created
     ownedBy {
       id
-      __typename
       username
     }
     stages {
@@ -66,7 +64,6 @@ export const UPSERT_MODULE_MUTATION = gql`
       module {
         ...extendedModuleFragment
       }
-      __typename
     }
   }
   ${extendedModuleFragment}

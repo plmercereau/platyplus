@@ -4,9 +4,9 @@
     app-tool-bar(:title="$store.state.title")
     v-content
       v-container(fluid style="min-height: 0;" grid-list-lg)
-        transition(name="fade" mode="out-in")
-          keep-alive
-            router-view(:key="$route.fullPath")
+        keep-alive
+          router-view(:key="$route.fullPath", v-if="$route.meta.keepAlive")
+        router-view(:key="$route.fullPath", v-if="!$route.meta.keepAlive")
     v-footer(app fixed)
       span &copy; 2018 -&nbsp;
       span Icons made by&nbsp;

@@ -4,12 +4,10 @@ import * as types from '../store/mutation-types'
 import _ from 'lodash'
 import {DATA_ITEMS_CONFIG} from '../config/queries'
 import {QUEUE_SCHEDULE} from '../config'
-import {loadDefaultCache, firstAttribute, formToData} from '../utils/graphql'
+import {firstAttribute, formToData} from '../utils/graphql'
 
 const GraphQLHelper = {
   install (Vue) {
-    loadDefaultCache()
-
     Vue.processQueue = () => {
       setImmediate(function () {
         const queue = store.state.graphqlModule.mutationsQueue

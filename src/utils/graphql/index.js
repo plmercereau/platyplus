@@ -182,36 +182,49 @@ function modelToObject ({itemName, typeName, upsertMutation}, depth = 3, simpleM
   if (depth > MAX_DEPTH) throw new Error('Requested depth is too high, exponential algorithm')
   const DEFAULT_VALUE = ''
   return itemIntrospection({itemName, typeName}).then((queryResult) => {
-    let result = {}
+    let promises = []
     if (_.has(queryResult, 'data.__type.fields')) {
-      result.__typename = itemName ? `${_.upperFirst(itemName)}Node` : typeName
-      queryResult.data.__type.fields.map((field) => {
+      promises = queryResult.data.__type.fields.map((field) => {
         if (!subSelection || _.has(subSelection, field.name)) {
           if (field.type.kind === 'OBJECT' && (subSelection || depth > 0)) {
             if (field.type.interfaces) {
               if (_.isEmpty(field.type.interfaces) && field.type.name.lastIndexOf('Connection') > 0) {
-                let nodeType = field.type.name.substring(0, field.type.name.lastIndexOf('Connection'))
-                modelToObject({typeName: nodeType}, depth - 1, subSelection[field.name].edges[0].node).then((data) => {
-                  result[field.name] = {
+                // let nodeType = field.type.name.substring(0, field.type.name.lastIndexOf('Connection'))
+                return {
+                  [field.name]: {
                     __typename: field.type.name,
                     pageInfo: '',
-                    edges: [{node: data}]
-                  }
-                })
+                    edges: []
+                  }}
+                // return modelToObject({typeName: nodeType}, depth - 1, subSelection[field.name].edges[0].node).then((data) => {
+                //   return {[field.name]: {
+                //     __typename: field.type.name,
+                //     pageInfo: '',
+                //     edges: [{node: data}]
+                //   }}
+                // })
               } else {
                 var found = field.type.interfaces.find((element) => { return element.name === 'Node' })
                 if (found) {
-                  modelToObject({typeName: field.type.name}, depth - 1, subSelection[field.name]).then((data) => {
-                    result[field.name] = data
+                  return modelToObject({typeName: field.type.name}, depth - 1, subSelection[field.name]).then((data) => {
+                    return {[field.name]: data}
                   })
-                } else result[field.name] = DEFAULT_VALUE
+                } else return {[field.name]: DEFAULT_VALUE}
               }
             }
-          } else result[field.name] = DEFAULT_VALUE
+          } else return {[field.name]: DEFAULT_VALUE}
         }
       })
     }
-    return result
+    return Promise.all(promises).then(result => {
+      return {
+        ...result.reduce((dest, curs) => {
+          if (curs) dest[Object.keys(curs)[0]] = curs[Object.keys(curs)[0]]
+          return dest
+        }, {}),
+        __typename: itemName ? `${_.upperFirst(itemName)}Node` : typeName
+      }
+    })
   })
 }
 
@@ -221,8 +234,16 @@ function loadIntrospections () {
   })
 }
 
+function loadLists () {
+  Object.keys(DATA_ITEMS_CONFIG).map((el) => {
+    let config = DATA_ITEMS_CONFIG[el]
+    if (config.collectionQuery) apolloClient.query({query: config.collectionQuery})
+  })
+}
+
 function loadDefaultCache () {
   loadIntrospections()
+  loadLists()
 }
 
 export {

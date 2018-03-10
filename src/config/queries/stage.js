@@ -3,7 +3,6 @@ import gql from 'graphql-tag'
 export const coreStageFragment = gql`
   fragment coreStageFragment on StageNode {
     id
-    __typename
     name
     shortDescription
   }
@@ -14,10 +13,8 @@ export const extendedStageFragment = gql`
     ...coreStageFragment
     module {
       id
-      __typename
       ownedBy {
         id
-        __typename
         username
       }
     }
@@ -25,7 +22,6 @@ export const extendedStageFragment = gql`
       edges {
         node {
           id
-          __typename
         }
       }
     }
@@ -55,7 +51,6 @@ export const UPSERT_STAGE_MUTATION = gql`
       stage {
         ...extendedStageFragment
       }
-      __typename
     }
   }
   ${extendedStageFragment}

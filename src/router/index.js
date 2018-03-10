@@ -52,6 +52,7 @@ const router = new Router({
       path: '/home',
       component: Home,
       meta: {
+        keepAlive: true,
         title: 'Home',
         type: 'home'
       }
@@ -60,6 +61,7 @@ const router = new Router({
       path: '/org-units',
       component: OrgUnit,
       meta: {
+        keepAlive: true,
         title: 'Organisational Units',
         type: 'orgUnit'
       }
@@ -69,6 +71,7 @@ const router = new Router({
       component: OrgUnit,
       props: { create: true },
       meta: {
+        keepAlive: false,
         title: 'Organisational Unit',
         type: 'orgUnit',
         action: 'create'
@@ -78,6 +81,7 @@ const router = new Router({
       path: '/org-units/:orgUnitId',
       component: OrgUnit,
       meta: {
+        keepAlive: true,
         title: 'Organisational Unit',
         type: 'orgUnit',
         action: 'read'
@@ -87,6 +91,7 @@ const router = new Router({
       path: '/modules',
       component: ModuleList,
       meta: {
+        keepAlive: true,
         title: 'Modules',
         type: 'module'
       }
@@ -96,6 +101,7 @@ const router = new Router({
       component: Module,
       props: { create: true },
       meta: {
+        keepAlive: false,
         title: 'Module',
         type: 'module',
         action: 'create'
@@ -105,6 +111,7 @@ const router = new Router({
       path: '/modules/:moduleId',
       component: Module,
       meta: {
+        keepAlive: true,
         title: 'Module',
         type: 'module',
         action: 'read'
@@ -115,6 +122,7 @@ const router = new Router({
       props: { create: true },
       component: Stage,
       meta: {
+        keepAlive: false,
         title: 'Stage'
       }
     },
@@ -122,6 +130,7 @@ const router = new Router({
       path: '/modules/:moduleId/stages/:stageId',
       component: Stage,
       meta: {
+        keepAlive: true,
         title: 'Stage'
       }
     }

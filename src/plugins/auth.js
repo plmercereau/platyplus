@@ -3,6 +3,7 @@ import router from '../router'
 import store from '../store'
 import apolloClient from '../plugins/apollo-client'
 import {AUTH_TOKEN, ME_QUERY, SIGNIN_USER_MUTATION, defineAbilitiesFor} from '../config'
+import {loadDefaultCache} from '../utils/graphql'
 
 const AuthPlugin = {
   install (Vue) {
@@ -10,6 +11,7 @@ const AuthPlugin = {
       apolloClient.query({query: ME_QUERY}).then((res) => {
         store.commit(types.SET_USER, res.data.me)
       })
+      loadDefaultCache()
     }
 
     Vue.mixin({
