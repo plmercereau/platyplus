@@ -36,13 +36,28 @@ const GraphQLHelper = {
         return apolloClient.mutate({
           mutation: upsertMutation,
           variables: formData,
+          refetchQueries () {
+            if (!formData.id) {
+              console.log('refetch queries of a new item')
+              // TODO update related items e.g. parent item in a tree (attributes "children" and "ancestors"),
+              // TODO     module in a stage (attribute "stages"...)
+              // TODO     easiest way to proceed would be to re-fetch the related items
+              // TODO     https://www.apollographql.com/docs/react/features/cache-updates.html#refetchQueries
+            }
+            return []
+          },
           update (store, updatedData) {
-            // TODO create cache query when we just created an item i.e. when the colleciton query is  not existing?
+            let updatedNode = firstAttribute(updatedData.data, 2)
+            if (updatedNode.optimistic && !updatedNode.id) {
+              console.log('optimistic response of a created element')
+              // TODO add the updatedNode to dependent items e.g. stage to module.stages
+            }
+            // TODO create cache query when we just created an item i.e. when the collection query is  not existing?
             if (collectionQuery) {
               try {
-                const data = store.readQuery({query: collectionQuery}) // TODO sort by name
-                let updatedNode = firstAttribute(updatedData.data, 2)
-                let item = firstAttribute(data)
+                console.log(updatedNode)
+                const data = store.readQuery({query: collectionQuery})
+                let item = _.values(data)[0]
                 let foundIndex = item['edges'].findIndex((element) => {
                   return element.node.id === updatedNode.id
                 })
@@ -61,7 +76,7 @@ const GraphQLHelper = {
           optimisticResponse: {
             [upsertName]: {
               [itemName]: optimisticData,
-              __typename: `${_.upperFirst(upsertName)}Payload` // TODO could be guessed with gql introspection
+              __typename: `${_.upperFirst(upsertName)}Payload` // TODO could be guessed from gql introspection
             }
           }
         }).then((res) => {

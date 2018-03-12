@@ -7,6 +7,7 @@
         v-icon(slot="divider") chevron_right
         v-breadcrumbs-item(to="/modules", exact) Modules
         v-breadcrumbs-item(:to="'/modules/'+module.id", exact) {{module.name}}
+        v-breadcrumbs-item(disabled) Stages
         v-breadcrumbs-item {{stage.name || 'New'}}
       v-btn(v-if="!edit && $can('edit', stage)", @click="edit=!edit") Edit
       v-btn(v-if="edit && $can('edit', stage)", @click="upsertForm") Save

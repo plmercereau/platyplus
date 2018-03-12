@@ -8,7 +8,7 @@ export const dataItemMixin = {
   data () {
     return {
       loading: 0,
-      config: [],
+      config: {},
       formData: [],
       edit: this.create // edit mode: turns on/off the forms inputs
     }

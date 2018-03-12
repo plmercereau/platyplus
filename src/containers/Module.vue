@@ -11,6 +11,7 @@
       v-btn(v-if="edit && $can('edit', module)", @click="upsertForm") Save
       v-btn(v-if="edit && $can('edit', module)", @click="reset") Reset
       v-btn(v-if="edit && $can('edit', module)", @click="cancel") Cancel
+      v-btn(v-if="$can('edit', module)", @click="refetchAll") Refetch all
       v-tabs(v-model="currentTab")
         v-tab(v-for="tab in tabs", :key="tab", :href="'#' + tab", ripple) {{ tab }}
         v-tab-item(key="General" id="General")
@@ -21,6 +22,7 @@
               v-form(v-if="edit" ref="moduleForm")
                 v-text-field(label="Name", v-model="formData.module.name", :counter="20", data-vv-name="name", required, v-validate="'required|min:3|max:20'", :error-messages="errors.collect('name')")
                 v-text-field(label="Short description", v-model="formData.module.shortDescription", :counter="280", multi-line rows="2",  auto-grow, data-vv-name="shortDescription", data-vv-as="short description", required, v-validate="'required|min:10|max:280'", :error-messages="errors.collect('shortDescription')")
+              i TODO checkbox or action "make multi-stages". If in create mode, then radio button
         v-tab-item(v-if="!create", key="Stages", id="Stages")
           v-card
             v-card-text
@@ -47,6 +49,8 @@
               |One icon (check?) to tell the module is deployed
               br
               |Actions: deploy/undeploy/remove access
+              br
+              i TODO: rename this tab into "Usages" of "Availability" or "Authorisations"
               v-list
                 v-list-tile(@click="")
                   v-list-tile-content
@@ -78,7 +82,7 @@
     components: {LoadingPage, ErrorsPage},
     data () {
       return {
-        tabs: ['General', 'Stages', 'Deployments'],
+        tabs: ['General', 'Global Data Elements', 'Stages', 'Customisations', 'Deployments'],
         currentTab: 'General',
         module: {}
       }

@@ -3,8 +3,7 @@ import {WebSocketLink} from 'apollo-link-ws/lib/index'
 import {AUTH_TOKEN} from '../config'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { persistCache } from 'apollo-cache-persist'
-import {getMainDefinition} from 'apollo-utilities/lib/index'
-import {HttpLink} from 'apollo-link-http/lib/index'
+import {getMainDefinition} from 'apollo-utilities'
 import ApolloClient from 'apollo-client/index'
 import { onError } from 'apollo-link-error'
 import router from '../router'
@@ -12,6 +11,7 @@ import * as types from '../store/mutation-types'
 import store from '../store'
 import {concat, split} from 'apollo-link'
 import { setContext } from 'apollo-link-context'
+import {HttpLink} from 'apollo-link-http'
 
 const httpLink = new HttpLink({
   uri: process.env.GRAPHQL_API || 'http://localhost:8000/graphql/',
