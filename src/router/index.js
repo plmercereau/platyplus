@@ -13,7 +13,9 @@ import Login from '../containers/Login'
 import store from '../store'
 import * as types from '../store/mutation-types'
 import apolloClient from '../plugins/apollo-client'
-import {ME_QUERY, AUTH_TOKEN, defineAbilitiesFor} from '../config'
+import {AUTH_TOKEN} from '../config/settings'
+import {ME_QUERY} from '../config/queries/user'
+import { defineAbilitiesFor } from '../config'
 
 Vue.use(Router)
 

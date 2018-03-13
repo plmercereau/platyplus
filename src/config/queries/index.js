@@ -3,11 +3,6 @@ import * as moduleQueries from './module'
 import * as stageQueries from './stage'
 import * as orgUnitQueries from './orgUnit'
 
-export * from './module'
-export * from './stage'
-export * from './user'
-export * from './orgUnit'
-
 export const TYPE_INTROSPECTION = gql`
   query TypeInstrospection($name: String!){
     __type(name: $name) {

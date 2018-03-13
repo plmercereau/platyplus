@@ -1,6 +1,6 @@
 import localforage from 'localforage'
 import {WebSocketLink} from 'apollo-link-ws/lib/index'
-import {AUTH_TOKEN} from '../config'
+import {AUTH_TOKEN} from '../config/settings'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { persistCache } from 'apollo-cache-persist'
 import {getMainDefinition} from 'apollo-utilities'

@@ -3,7 +3,9 @@ import * as types from '../store/mutation-types'
 import router from '../router'
 import store from '../store'
 import apolloClient from '../plugins/apollo-client'
-import {AUTH_TOKEN, ME_QUERY, SIGNIN_USER_MUTATION, defineAbilitiesFor} from '../config'
+import {AUTH_TOKEN} from '../config/settings'
+import {ME_QUERY, SIGNIN_USER_MUTATION} from '../config/queries/user'
+import {defineAbilitiesFor} from '../config'
 import {loadDefaultCache} from '../utils/graphql'
 
 const AuthPlugin = {

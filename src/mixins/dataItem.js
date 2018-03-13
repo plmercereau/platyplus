@@ -1,5 +1,5 @@
 import {firstAttribute, getItemName, formToData, dataToForm, startInterval, stopInterval} from '../utils/graphql'
-import {REFETCH_ATTEMPS} from '../config'
+import {REFETCH_ATTEMPS} from '../config/settings'
 
 export const dataItemMixin = {
   props: {

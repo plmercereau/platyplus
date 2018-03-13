@@ -58,7 +58,7 @@
   import {itemManager} from '../utils/graphql'
   import LoadingPage from '../components/LoadingPage'
   import ErrorsPage from '../components/ErrorsPage'
-  import {DATA_ITEMS_CONFIG} from '../config'
+  import {DATA_ITEMS_CONFIG} from '../config/queries'
 
   export default {
     name: 'stage',

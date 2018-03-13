@@ -10,7 +10,7 @@ module.exports = {
 
     browser
       .url(devServer)
-      .waitForElementVisible('#app', 200000) // TODO too long, changed to pass Travis CI. Original value: 5000
+      .waitForElementVisible('#app', 5000)
       // .assert.elementPresent('.hello')
       .assert.containsText('h1', 'Home')
       // .assert.elementCount('img', 1)

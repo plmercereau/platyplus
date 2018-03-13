@@ -6,7 +6,7 @@
       v-breadcrumbs(large)
         v-icon(slot="divider") chevron_right
         v-breadcrumbs-item(to="/org-units", exact) Org Units
-        v-breadcrumbs-item(v-if="orgUnit.id && orgUnit.ancestors", v-for="ancestor in orgUnit.ancestors.edges", :to="'/org-units/' + ancestor.node.id") {{ancestor.node.name}}
+        v-breadcrumbs-item(v-if="orgUnit.id && orgUnit.ancestors", v-for="ancestor in orgUnit.ancestors.edges", :key="ancestor.node.id", :to="'/org-units/' + ancestor.node.id") {{ancestor.node.name}}
         v-breadcrumbs-item(v-if="orgUnit.id", :to="'/org-units/' + orgUnit.id") {{orgUnit.name}}
       v-btn(v-if="$can('create', 'orgUnit')", to="/org-units/create") New root organisational unit
       v-btn(v-if="!edit && $can('edit', orgUnit)", @click="edit=!edit") Edit
@@ -33,7 +33,7 @@
   import {itemManager} from '../utils/graphql'
   import LoadingPage from '../components/LoadingPage'
   import ErrorsPage from '../components/ErrorsPage'
-  import {DATA_ITEMS_CONFIG} from '../config'
+  import {DATA_ITEMS_CONFIG} from '../config/queries'
 
   const orgUnitConfig = DATA_ITEMS_CONFIG.orgUnit
 

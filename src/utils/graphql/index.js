@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import {REFETCH_INTERVAL, DATA_ITEMS_CONFIG, TYPE_INTROSPECTION} from '../../config'
+import {REFETCH_INTERVAL} from '../../config/settings'
+import {DATA_ITEMS_CONFIG, TYPE_INTROSPECTION} from '../../config/queries'
 import apolloClient from '../../plugins/apollo-client'
 
 function itemManager (config) {

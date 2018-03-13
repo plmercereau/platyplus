@@ -3,7 +3,7 @@ import apolloClient from '../plugins/apollo-client'
 import * as types from '../store/mutation-types'
 import _ from 'lodash'
 import {DATA_ITEMS_CONFIG} from '../config/queries'
-import {QUEUE_SCHEDULE} from '../config'
+import {QUEUE_SCHEDULE} from '../config/settings'
 import {firstAttribute, formToData} from '../utils/graphql'
 
 const GraphQLHelper = {

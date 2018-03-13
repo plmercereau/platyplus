@@ -6,7 +6,7 @@
 </template>
 
 <script>
-  import {TYPE_INTROSPECTION} from '../config'
+  import {TYPE_INTROSPECTION} from '../config/queries'
   import localforage from 'localforage'
   export default {
     name: 'sandbox',

@@ -6,7 +6,7 @@
 </template>
 
 <script>
-  import { ALL_MODULES_QUERY } from '../config'
+  import { ALL_MODULES_QUERY } from '../config/queries/module'
   import ModuleItem from '../components/ModuleItem'
   export default {
     name: 'ModuleList',
